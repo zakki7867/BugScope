@@ -45,5 +45,34 @@ BugScope introduces **evidence-checked debugging**:
 - **Current Endpoints**:
   - `GET /health`: Health and version probe.
   - `POST /api/analyze-failure`: Accepts a pasted trace and returns the parsed `FailureReport`.
+  - `POST /api/investigate/upload-zip`: Accepts a project ZIP archive and error trace, validates security, and produces the `ContextBundle`.
 - **Interview explanation**:
   > *"FastAPI provides asynchronous request handling, automatic OpenAPI schema generation, and automatic request validation through Pydantic models."*
+
+---
+
+## 3. Milestone 2 Architecture
+
+### `app/services/zip_handler.py` — Safe Archive Extraction
+- **What it does**: Ingests uploaded ZIP files and enforces defensive security boundaries before extraction.
+- **Defenses enforced**:
+  1. **Archive Size**: Enforces 20 MB ceiling.
+  2. **File Count Cap**: Blocks zip bombs (> 1,000 files).
+  3. **Zip Slip Prevention**: Computes canonical destination path and verifies it strictly resides inside the temporary target folder via `pathlib.Path.relative_to`.
+  4. **Symlink Prohibition**: Inspects POSIX file mode bits (`stat.S_ISLNK`) and refuses extraction if symlinks are detected.
+  5. **Data Isolation**: Strips `.git`, `node_modules`, `venv`, `.env` files, and binary executables.
+- **Interview explanation**:
+  > *"Allowing arbitrary ZIP uploads is a classic security vulnerability (Zip Slip, zip bombs, symlink attacks). BugScope inspects every entry header before extraction, strips secrets and binaries, and unpacks strictly into isolated temporary folders."*
+
+### `app/workflow/nodes/repo_investigator.py` — Deterministic Codebase Slicer
+- **What it does**: Analyzes Python code using Python's built-in `ast` module to build a bounded `ContextBundle`.
+- **How it works**:
+  1. **File Tree**: Indexes the repository structure while filtering out hidden metadata.
+  2. **Symbol Resolution**: Parses the failing file's AST and traverses class/function boundaries to find the exact function covering the crash line.
+  3. **Callee Discovery**: Walks call expressions within the failing function to identify external helpers called.
+  4. **Caller Discovery**: Scans other `.py` files across the codebase to identify functions that call the failing symbol.
+  5. **Test Discovery**: Identifies test files matching the failing module or symbol name.
+  6. **Token-Budget Slicing**: Formats code into line-numbered snippets (`0012 | line content`), capping output to the configured token budget (default 8,000 tokens).
+- **Interview explanation**:
+  > *"Rather than dumping an entire codebase into an LLM prompt (which introduces noise, hallucinations, and high costs), the repo investigator deterministically navigates AST nodes to extract the target function, its callers, its callees, and its unit tests within a strict token budget."*
+
