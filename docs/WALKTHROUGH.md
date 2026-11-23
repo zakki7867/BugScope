@@ -132,5 +132,41 @@ BugScope introduces **evidence-checked debugging**:
 - **Interview explanation**:
   > *"The core differentiator of BugScope is mechanical evidence verification. If an LLM invents code to justify its theory, that quote is checked against disk and immediately thrown out. An LLM cannot bluff its way to the top of our ranking."*
 
+---
+
+## 6. Milestone 5 Architecture
+
+### `app/services/patcher.py` — Deterministic Diff Engine
+- **What it does**: Parses and applies standard unified diffs to repository files on disk without external binary dependencies.
+- **Key feature**: Supports exact line matching as well as whitespace-relaxed window matching, ensuring patches apply reliably across platforms.
+- **Interview explanation**:
+  > *"Rather than shelling out to GNU patch or git apply which vary across OS platforms, we built a deterministic diff parser and patcher in Python that operates on temporary clones."*
+
+### `app/workflow/nodes/fix_generator.py` — Minimal Patch & Ambiguity Detector
+- **What it does**: Generates a unified diff from the top supported hypothesis.
+- **Ambiguity Detection**: If business requirements or intended behavior are ambiguous after reading code and tests (e.g. should a missing key raise an error or return default?), it sets `status="needs_human_decision"` and outputs multiple options rather than guessing.
+- **Interview explanation**:
+  > *"Good senior engineers don't guess when business logic is ambiguous. BugScope detects ambiguous specifications and surfaces concrete options to the user under the 'needs_human_decision' verdict."*
+
+### `app/workflow/nodes/test_generator.py` — Regression Test Synthesizer
+- **What it does**: Synthesizes a focused pytest test function designed specifically to reproduce the failure.
+- **Interview explanation**:
+  > *"A fix is only as good as the test that protects it. BugScope synthesizes a regression test that isolates the bug before validating the patch."*
+
+### `app/workflow/nodes/validator.py` — 3-Phase Mechanical Validation
+- **What it does**: Evaluates the proposed patch and regression test inside disposable containers:
+  1. **Phase 1**: Run regression test on unpatched code (MUST FAIL).
+  2. **Phase 2**: Apply patch to clean clone, run regression test (MUST PASS).
+  3. **Phase 3**: Run full existing test suite on patched copy (MUST HAVE ZERO REGRESSIONS).
+- **Retry Loop**: If validation fails and fewer than 2 retries have been consumed, the failure log is passed back to `fix_generator` for automated patch repair.
+- **Interview explanation**:
+  > *"We only award the 'validated' verdict if all three mechanical conditions are met: the regression test failed before, passed after, and no existing tests broke. No LLM self-evaluation is involved."*
+
+### `app/workflow/graph.py` — LangGraph State Machine
+- **What it does**: Compiles the linear and conditional edges, including routing after evidence verification, ambiguity checks, and the validation retry loop.
+- **Interview explanation**:
+  > *"LangGraph coordinates our deterministic and LLM nodes as a typed state machine with explicit retry loops and conditional exits."*
+
+
 
 

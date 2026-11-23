@@ -1,0 +1,148 @@
+"""Deterministic unified diff patch application utility.
+
+Applies standard unified diffs to files on disk without relying on external patch binaries.
+Safe, robust, and supports standard unified diff format (with or without a/ b/ prefixes).
+"""
+
+import re
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+
+class PatchError(Exception):
+    """Raised when a patch cannot be cleanly applied."""
+    pass
+
+
+def parse_unified_diff(diff_text: str) -> Dict[str, List[Tuple[List[str], List[str]]]]:
+    """Parse unified diff text into a mapping of file_path -> list of (old_lines, new_lines)."""
+    file_patches: Dict[str, List[Tuple[List[str], List[str]]]] = {}
+    current_file: Optional[str] = None
+    current_hunks: List[Tuple[List[str], List[str]]] = []
+    old_hunk: List[str] = []
+    new_hunk: List[str] = []
+    in_hunk = False
+
+    lines = diff_text.strip().splitlines()
+
+    for line in lines:
+        if line.startswith("--- "):
+            continue
+        elif line.startswith("+++ "):
+            # Save previous file hunks if any
+            if current_file and (old_hunk or new_hunk):
+                current_hunks.append((old_hunk, new_hunk))
+                file_patches[current_file] = current_hunks
+                old_hunk, new_hunk = [], []
+                current_hunks = []
+
+            # Extract target file path (strip +++ b/ or +++ )
+            raw_path = line[4:].strip()
+            if raw_path.startswith("b/"):
+                raw_path = raw_path[2:]
+            current_file = raw_path.replace("\\", "/").strip().lstrip("/")
+            current_hunks = []
+            in_hunk = False
+
+        elif line.startswith("@@"):
+            if in_hunk and (old_hunk or new_hunk):
+                current_hunks.append((old_hunk, new_hunk))
+                old_hunk, new_hunk = [], []
+            in_hunk = True
+
+        elif in_hunk and current_file:
+            if line.startswith("-"):
+                old_hunk.append(line[1:])
+            elif line.startswith("+"):
+                new_hunk.append(line[1:])
+            elif line.startswith(" "):
+                # Context line present in both
+                old_hunk.append(line[1:])
+                new_hunk.append(line[1:])
+
+    if current_file:
+        if old_hunk or new_hunk:
+            current_hunks.append((old_hunk, new_hunk))
+        if current_hunks:
+            file_patches[current_file] = current_hunks
+
+    return file_patches
+
+
+def apply_patch_to_directory(repo_dir: str, diff_text: str) -> List[str]:
+    """Apply a unified diff patch to files in repo_dir.
+
+    Args:
+        repo_dir: Absolute path of repository.
+        diff_text: Unified diff string.
+
+    Returns:
+        List of modified file relative paths.
+
+    Raises:
+        PatchError: If patch cannot be applied cleanly.
+    """
+    if not diff_text.strip():
+        raise PatchError("Diff text is empty.")
+
+    patches = parse_unified_diff(diff_text)
+    if not patches:
+        raise PatchError("Could not parse any valid hunks from unified diff.")
+
+    repo_path = Path(repo_dir).resolve()
+    modified_files: List[str] = []
+
+    for rel_path, hunks in patches.items():
+        target_path = (repo_path / rel_path).resolve()
+        # Fallback to search if relative path is slightly mismatched
+        if not target_path.is_file():
+            candidates = list(repo_path.rglob(Path(rel_path).name))
+            if candidates:
+                target_path = candidates[0]
+            else:
+                raise PatchError(f"Target file for patch not found on disk: {rel_path}")
+
+        try:
+            content = target_path.read_text(encoding="utf-8", errors="replace")
+        except Exception as exc:
+            raise PatchError(f"Could not read {target_path}: {exc}") from exc
+
+        # Apply each hunk sequentially
+        for old_lines, new_lines in hunks:
+            old_str = "\n".join(old_lines)
+            new_str = "\n".join(new_lines)
+
+            # 1. Exact match attempt
+            if old_str in content:
+                content = content.replace(old_str, new_str, 1)
+                continue
+
+            # 2. Whitespace-relaxed match attempt
+            lines = content.splitlines()
+            old_norm = [re.sub(r"\s+", " ", l).strip() for l in old_lines if l.strip()]
+            matched = False
+
+            if old_norm:
+                for idx in range(len(lines) - len(old_norm) + 1):
+                    window = [
+                        re.sub(r"\s+", " ", lines[idx + k]).strip()
+                        for k in range(len(old_norm))
+                    ]
+                    if window == old_norm:
+                        # Replace window
+                        before = lines[:idx]
+                        after = lines[idx + len(old_norm) :]
+                        content = "\n".join(before + new_lines + after)
+                        matched = True
+                        break
+
+            if not matched:
+                raise PatchError(
+                    f"Hunk target could not be located in {rel_path}:\nOld lines:\n{old_str}"
+                )
+
+        target_path.write_text(content, encoding="utf-8")
+        rel_saved = target_path.relative_to(repo_path).as_posix()
+        modified_files.append(rel_saved)
+
+    return modified_files

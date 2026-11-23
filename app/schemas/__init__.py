@@ -9,6 +9,8 @@ from app.schemas.hypothesis import (
     RankedHypothesis,
     HypothesesResponse,
 )
+from app.schemas.fix import FixProposal, RegressionTest
+from app.schemas.validation import ValidationReport, VerdictType
 
 __all__ = [
     "FailureCategory",
@@ -21,4 +23,8 @@ __all__ = [
     "Hypothesis",
     "RankedHypothesis",
     "HypothesesResponse",
+    "FixProposal",
+    "RegressionTest",
+    "ValidationReport",
+    "VerdictType",
 ]

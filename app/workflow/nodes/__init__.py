@@ -5,6 +5,9 @@ from app.workflow.nodes.repo_investigator import repo_investigator
 from app.workflow.nodes.reproducer import reproducer
 from app.workflow.nodes.hypothesis_generator import hypothesis_generator
 from app.workflow.nodes.evidence_verifier import evidence_verifier
+from app.workflow.nodes.fix_generator import fix_generator
+from app.workflow.nodes.test_generator import test_generator
+from app.workflow.nodes.validator import validator
 
 __all__ = [
     "failure_analyzer",
@@ -12,4 +15,7 @@ __all__ = [
     "reproducer",
     "hypothesis_generator",
     "evidence_verifier",
+    "fix_generator",
+    "test_generator",
+    "validator",
 ]
