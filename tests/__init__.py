@@ -1,0 +1,1 @@
+"""BugScope test package."""

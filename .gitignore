@@ -1,0 +1,16 @@
+# Environments and secrets
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+scratch/
+temp_extracted/
