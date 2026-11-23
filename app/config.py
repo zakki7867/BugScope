@@ -39,6 +39,12 @@ class Settings(BaseModel):
     db_path: str = Field(
         default_factory=lambda: os.getenv("BUGSCOPE_DB_PATH", "bugscope.db")
     )
+    database_url: str = Field(
+        default_factory=lambda: os.getenv(
+            "DATABASE_URL",
+            f"sqlite:///{os.getenv('BUGSCOPE_DB_PATH', 'bugscope.db')}",
+        )
+    )
     max_retries: int = Field(
         default_factory=lambda: int(os.getenv("BUGSCOPE_MAX_RETRIES", "2"))
     )

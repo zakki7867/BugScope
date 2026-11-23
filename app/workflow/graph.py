@@ -10,6 +10,7 @@ from langgraph.graph import END, StateGraph
 
 from app.schemas.validation import VerdictType
 from app.workflow.nodes.evidence_verifier import evidence_verifier
+from app.workflow.nodes.experiment_runner import experiment_runner
 from app.workflow.nodes.failure_analyzer import failure_analyzer
 from app.workflow.nodes.fix_generator import fix_generator
 from app.workflow.nodes.hypothesis_generator import hypothesis_generator
@@ -139,6 +140,30 @@ def node_evidence_verifier(state: BugScopeState) -> Dict[str, Any]:
     }
 
 
+def node_experiment_runner(state: BugScopeState) -> Dict[str, Any]:
+    """Deterministic controlled experiment runner."""
+    start_t = time.time()
+    results = experiment_runner(
+        repo_dir=state["repo_dir"],
+        failure_report=state["failure_report"],
+        ranked_hypotheses=state.get("ranked_hypotheses", []),
+        reproduction_result=state.get("reproduction_result"),
+    )
+    elapsed_ms = round((time.time() - start_t) * 1000, 2)
+    confirmed_count = sum(1 for r in results if r.conclusion == "confirmed")
+    trace_entry = {
+        "node": "experiment_runner",
+        "input_summary": f"Testing {len(results)} candidate hypotheses",
+        "output_summary": f"{confirmed_count}/{len(results)} confirmed by controlled sandbox experiment",
+        "duration_ms": elapsed_ms,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0,
+    }
+    traces = state.get("traces", []) + [trace_entry]
+    return {"experiments": results, "traces": traces}
+
+
 def node_fix_generator(state: BugScopeState) -> Dict[str, Any]:
     """Node 6: LLM fix generator."""
     start_t = time.time()
@@ -257,6 +282,7 @@ def create_bugscope_graph() -> StateGraph:
     workflow.add_node("reproducer", node_reproducer)
     workflow.add_node("hypothesis_generator", node_hypothesis_generator)
     workflow.add_node("evidence_verifier", node_evidence_verifier)
+    workflow.add_node("experiment_runner", node_experiment_runner)
     workflow.add_node("fix_generator", node_fix_generator)
     workflow.add_node("test_generator", node_test_generator)
     workflow.add_node("validator", node_validator)
@@ -268,10 +294,11 @@ def create_bugscope_graph() -> StateGraph:
     workflow.add_edge("repo_investigator", "reproducer")
     workflow.add_edge("reproducer", "hypothesis_generator")
     workflow.add_edge("hypothesis_generator", "evidence_verifier")
+    workflow.add_edge("evidence_verifier", "experiment_runner")
 
-    # Conditional routing after evidence verification
+    # Conditional routing after experiment runner
     workflow.add_conditional_edges(
-        "evidence_verifier",
+        "experiment_runner",
         route_after_evidence,
         {"fix_generator": "fix_generator", "report_builder": "report_builder"},
     )

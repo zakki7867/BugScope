@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from typing_extensions import TypedDict
 
 from app.schemas.context import ContextBundle
+from app.schemas.experiment import ExperimentResult
 from app.schemas.failure import FailureReport
 from app.schemas.fix import FixProposal, RegressionTest
 from app.schemas.hypothesis import Hypothesis, RankedHypothesis
@@ -23,6 +24,7 @@ class BugScopeState(TypedDict, total=False):
     reproduction_result: Optional[ReproductionResult]
     hypotheses: Optional[List[Hypothesis]]
     ranked_hypotheses: Optional[List[RankedHypothesis]]
+    experiments: Optional[List[ExperimentResult]]
     top_hypothesis: Optional[RankedHypothesis]
     fix_proposal: Optional[FixProposal]
     regression_test: Optional[RegressionTest]

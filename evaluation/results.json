@@ -2,16 +2,16 @@
   "bugscope": {
     "metrics": {
       "mode": "bugscope",
-      "total_bugs": 16,
+      "total_bugs": 20,
       "top1_root_cause_accuracy": 1.0,
       "top3_root_cause_accuracy": 1.0,
       "evidence_verified_rate": 1.0,
       "regression_test_executes_rate": 1.0,
-      "fix_validated_rate": 0.875,
-      "avg_seconds": 7.33,
+      "fix_validated_rate": 0.9,
+      "avg_seconds": 3.73,
       "avg_cost_usd": 0.00012,
       "verdict_counts": {
-        "validated": 14,
+        "validated": 18,
         "partially_validated": 0,
         "not_validated": 0,
         "could_not_reproduce": 0,
@@ -106,7 +106,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 8.45,
+        "duration_seconds": 3.57,
         "cost_usd": 0.00012
       },
       {
@@ -196,7 +196,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 8.46,
+        "duration_seconds": 3.6,
         "cost_usd": 0.00012
       },
       {
@@ -286,7 +286,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 8.26,
+        "duration_seconds": 3.62,
         "cost_usd": 0.00012
       },
       {
@@ -376,7 +376,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 7.8,
+        "duration_seconds": 4.03,
         "cost_usd": 0.00012
       },
       {
@@ -466,7 +466,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 7.3,
+        "duration_seconds": 3.52,
         "cost_usd": 0.00012
       },
       {
@@ -556,7 +556,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 8.42,
+        "duration_seconds": 3.8,
         "cost_usd": 0.00012
       },
       {
@@ -646,7 +646,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 7.86,
+        "duration_seconds": 3.83,
         "cost_usd": 0.00012
       },
       {
@@ -736,7 +736,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 8.03,
+        "duration_seconds": 4.06,
         "cost_usd": 0.00012
       },
       {
@@ -826,7 +826,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 7.9,
+        "duration_seconds": 3.94,
         "cost_usd": 0.00012
       },
       {
@@ -916,7 +916,7 @@
         },
         "verdict": "needs_human_decision",
         "regression_test_executed": true,
-        "duration_seconds": 6.94,
+        "duration_seconds": 3.36,
         "cost_usd": 0.00012
       },
       {
@@ -1006,7 +1006,7 @@
         },
         "verdict": "needs_human_decision",
         "regression_test_executed": true,
-        "duration_seconds": 8.2,
+        "duration_seconds": 3.91,
         "cost_usd": 0.00012
       },
       {
@@ -1096,7 +1096,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 6.91,
+        "duration_seconds": 3.3,
         "cost_usd": 0.00012
       },
       {
@@ -1186,7 +1186,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 6.66,
+        "duration_seconds": 3.64,
         "cost_usd": 0.00012
       },
       {
@@ -1276,7 +1276,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 5.66,
+        "duration_seconds": 3.7,
         "cost_usd": 0.00012
       },
       {
@@ -1366,7 +1366,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 4.83,
+        "duration_seconds": 3.61,
         "cost_usd": 0.00012
       },
       {
@@ -1456,7 +1456,367 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 5.55,
+        "duration_seconds": 3.82,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_17_concurrency_race",
+        "ground_truth": {
+          "bug_id": "bug_17_concurrency_race",
+          "root_cause_category": "AssertionError",
+          "file": "app/counter.py",
+          "line": 8,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Counter allows negative count without bounding check."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/counter.py: AssertionError",
+            "explanation": "Counter allows negative count without bounding check.",
+            "evidence": [
+              {
+                "file": "app/counter.py",
+                "line_start": 8,
+                "line_end": 8,
+                "quote": "return self.count",
+                "stance": "supports",
+                "reason": "Code directly implements AssertionError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for AssertionError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/counter.py: AssertionError",
+          "explanation": "Counter allows negative count without bounding check.",
+          "evidence": [
+            {
+              "file": "app/counter.py",
+              "line_start": 8,
+              "line_end": 8,
+              "quote": "return self.count",
+              "stance": "supports",
+              "reason": "Code directly implements AssertionError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 3.66,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_18_pydantic_validation_upstream",
+        "ground_truth": {
+          "bug_id": "bug_18_pydantic_validation_upstream",
+          "root_cause_category": "ValueError",
+          "file": "app/parser.py",
+          "line": 3,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream parse_payload fails with ValueError converting ISO timestamp string to int."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/parser.py: ValueError",
+            "explanation": "Upstream parse_payload fails with ValueError converting ISO timestamp string to int.",
+            "evidence": [
+              {
+                "file": "app/parser.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return {\"id\": data[\"id\"], \"timestamp\": int(data[\"timestamp\"])}",
+                "stance": "supports",
+                "reason": "Code directly implements ValueError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": true,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for ValueError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/parser.py: ValueError",
+          "explanation": "Upstream parse_payload fails with ValueError converting ISO timestamp string to int.",
+          "evidence": [
+            {
+              "file": "app/parser.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return {\"id\": data[\"id\"], \"timestamp\": int(data[\"timestamp\"])}",
+              "stance": "supports",
+              "reason": "Code directly implements ValueError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": true,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 3.88,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_19_sql_parameter_leak",
+        "ground_truth": {
+          "bug_id": "bug_19_sql_parameter_leak",
+          "root_cause_category": "ValueError",
+          "file": "app/query.py",
+          "line": 3,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "build_user_query rejects single quotes with ValueError."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/query.py: ValueError",
+            "explanation": "build_user_query rejects single quotes with ValueError.",
+            "evidence": [
+              {
+                "file": "app/query.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "raise ValueError(\"Invalid username character\")",
+                "stance": "supports",
+                "reason": "Code directly implements ValueError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for ValueError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/query.py: ValueError",
+          "explanation": "build_user_query rejects single quotes with ValueError.",
+          "evidence": [
+            {
+              "file": "app/query.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "raise ValueError(\"Invalid username character\")",
+              "stance": "supports",
+              "reason": "Code directly implements ValueError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 3.72,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_20_circular_import_lazy",
+        "ground_truth": {
+          "bug_id": "bug_20_circular_import_lazy",
+          "root_cause_category": "ImportError",
+          "file": "app/service_b.py",
+          "line": 1,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Circular dependency between service_a and service_b at top-level import."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/service_b.py: ImportError",
+            "explanation": "Circular dependency between service_a and service_b at top-level import.",
+            "evidence": [
+              {
+                "file": "app/service_b.py",
+                "line_start": 1,
+                "line_end": 1,
+                "quote": "from app.service_a import compute_a",
+                "stance": "supports",
+                "reason": "Code directly implements ImportError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for ImportError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/service_b.py: ImportError",
+          "explanation": "Circular dependency between service_a and service_b at top-level import.",
+          "evidence": [
+            {
+              "file": "app/service_b.py",
+              "line_start": 1,
+              "line_end": 1,
+              "quote": "from app.service_a import compute_a",
+              "stance": "supports",
+              "reason": "Code directly implements ImportError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 4.12,
         "cost_usd": 0.00012
       }
     ]
@@ -1464,18 +1824,18 @@
   "baseline": {
     "metrics": {
       "mode": "baseline_single_prompt",
-      "total_bugs": 16,
+      "total_bugs": 20,
       "top1_root_cause_accuracy": 0.75,
       "top3_root_cause_accuracy": 0.75,
       "evidence_verified_rate": 0.5,
       "regression_test_executes_rate": 0.0,
-      "fix_validated_rate": 0.625,
-      "avg_seconds": 8.23,
+      "fix_validated_rate": 0.65,
+      "avg_seconds": 4.8,
       "avg_cost_usd": 8e-05,
       "verdict_counts": {
-        "validated": 10,
+        "validated": 13,
         "partially_validated": 0,
-        "not_validated": 6,
+        "not_validated": 7,
         "could_not_reproduce": 0,
         "needs_human_decision": 0
       }
@@ -1534,7 +1894,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.34,
+        "duration_seconds": 4.71,
         "cost_usd": 8e-05
       },
       {
@@ -1590,7 +1950,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.17,
+        "duration_seconds": 4.65,
         "cost_usd": 8e-05
       },
       {
@@ -1646,7 +2006,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.01,
+        "duration_seconds": 5.1,
         "cost_usd": 8e-05
       },
       {
@@ -1702,7 +2062,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.24,
+        "duration_seconds": 4.98,
         "cost_usd": 8e-05
       },
       {
@@ -1758,7 +2118,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 8.0,
+        "duration_seconds": 4.65,
         "cost_usd": 8e-05
       },
       {
@@ -1814,7 +2174,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.01,
+        "duration_seconds": 4.77,
         "cost_usd": 8e-05
       },
       {
@@ -1870,7 +2230,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 8.76,
+        "duration_seconds": 4.99,
         "cost_usd": 8e-05
       },
       {
@@ -1926,7 +2286,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.19,
+        "duration_seconds": 4.65,
         "cost_usd": 8e-05
       },
       {
@@ -1982,7 +2342,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.22,
+        "duration_seconds": 4.74,
         "cost_usd": 8e-05
       },
       {
@@ -2038,7 +2398,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 8.36,
+        "duration_seconds": 4.49,
         "cost_usd": 8e-05
       },
       {
@@ -2094,7 +2454,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 9.26,
+        "duration_seconds": 4.75,
         "cost_usd": 8e-05
       },
       {
@@ -2150,7 +2510,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 8.19,
+        "duration_seconds": 4.52,
         "cost_usd": 8e-05
       },
       {
@@ -2206,7 +2566,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.11,
+        "duration_seconds": 5.0,
         "cost_usd": 8e-05
       },
       {
@@ -2262,7 +2622,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 6.17,
+        "duration_seconds": 5.02,
         "cost_usd": 8e-05
       },
       {
@@ -2318,7 +2678,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 6.65,
+        "duration_seconds": 4.37,
         "cost_usd": 8e-05
       },
       {
@@ -2374,7 +2734,231 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 6.93,
+        "duration_seconds": 4.95,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_17_concurrency_race",
+        "ground_truth": {
+          "bug_id": "bug_17_concurrency_race",
+          "root_cause_category": "AssertionError",
+          "file": "app/counter.py",
+          "line": 8,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Counter allows negative count without bounding check."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for AssertionError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/counter.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for AssertionError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/counter.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 4.99,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_18_pydantic_validation_upstream",
+        "ground_truth": {
+          "bug_id": "bug_18_pydantic_validation_upstream",
+          "root_cause_category": "ValueError",
+          "file": "app/parser.py",
+          "line": 3,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream parse_payload fails with ValueError converting ISO timestamp string to int."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Crash line patch attempt in bug_18_pydantic_validation_upstream",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/parser.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Crash line patch attempt in bug_18_pydantic_validation_upstream",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/parser.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 4.9,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_19_sql_parameter_leak",
+        "ground_truth": {
+          "bug_id": "bug_19_sql_parameter_leak",
+          "root_cause_category": "ValueError",
+          "file": "app/query.py",
+          "line": 3,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "build_user_query rejects single quotes with ValueError."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for ValueError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/query.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for ValueError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/query.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 4.83,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_20_circular_import_lazy",
+        "ground_truth": {
+          "bug_id": "bug_20_circular_import_lazy",
+          "root_cause_category": "ImportError",
+          "file": "app/service_b.py",
+          "line": 1,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Circular dependency between service_a and service_b at top-level import."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for ImportError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/service_b.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for ImportError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/service_b.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 5.0,
         "cost_usd": 8e-05
       }
     ]

@@ -1,26 +1,43 @@
 """FastAPI backend application for BugScope.
 
-Exposes endpoints for health checks, failure analysis, and debugging workflow runs.
+Exposes comprehensive REST API endpoints for investigations, repository analysis,
+evidence verification, experiment execution, patch generation, validation, and evaluations.
 """
 
+from pathlib import Path
+from typing import Optional
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import Optional
 
 from app import __version__
-from app.schemas.failure import FailureReport
+from app.api import (
+    investigations_router,
+    repositories_router,
+    hypotheses_router,
+    evidence_router,
+    experiments_router,
+    patches_router,
+    validation_router,
+    reports_router,
+    evaluation_router,
+)
+from app.database.db import init_db, get_investigation, list_investigations
 from app.schemas.context import ContextBundle
+from app.schemas.failure import FailureReport
 from app.schemas.report import InvestigationReport
-from app.database.db import get_investigation, list_investigations, save_investigation
 from app.services.zip_handler import create_temp_repo_from_zip, ZipSecurityError
 from app.workflow.graph import create_bugscope_graph
 from app.workflow.nodes.failure_analyzer import failure_analyzer
 from app.workflow.nodes.repo_investigator import repo_investigator
 
+# Initialize database schema on startup
+init_db()
+
 app = FastAPI(
     title="BugScope API",
-    description="Evidence-checked debugging agent for Python",
+    description="Evidence-checked autonomous debugging agent for Python",
     version=__version__,
 )
 
@@ -32,12 +49,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount modular REST routers
+app.include_router(investigations_router)
+app.include_router(repositories_router)
+app.include_router(hypotheses_router)
+app.include_router(evidence_router)
+app.include_router(experiments_router)
+app.include_router(patches_router)
+app.include_router(validation_router)
+app.include_router(reports_router)
+app.include_router(evaluation_router)
 
-class AnalyzeFailureRequest(BaseModel):
-    """Request payload for failure analysis."""
-    raw_trace: str = Field(..., description="Pasted error message or Python traceback", min_length=1)
+
+# Root Web UI endpoint
+@app.get("/", response_class=FileResponse)
+def serve_dashboard_ui():
+    """Serve the BugScope interactive dashboard application."""
+    index_path = Path(__file__).parent / "static" / "index.html"
+    return FileResponse(index_path)
 
 
+# Root health and metadata endpoint
 @app.get("/health")
 def health_check():
     """Health check endpoint."""
@@ -45,7 +77,23 @@ def health_check():
         "status": "ok",
         "app": "BugScope",
         "version": __version__,
+        "endpoints": [
+            "/api/investigations",
+            "/api/repositories",
+            "/api/hypotheses",
+            "/api/evidence",
+            "/api/experiments",
+            "/api/patches",
+            "/api/validation",
+            "/api/reports",
+            "/api/evaluation",
+        ],
     }
+
+
+class AnalyzeFailureRequest(BaseModel):
+    """Request payload for failure analysis."""
+    raw_trace: str = Field(..., description="Pasted error message or Python traceback", min_length=1)
 
 
 @app.post("/api/analyze-failure", response_model=FailureReport)
@@ -116,21 +164,6 @@ def run_investigation_endpoint(request: RunInvestigationRequest):
     report = final_state.get("investigation_report")
     if not report:
         raise HTTPException(status_code=500, detail="Workflow failed to generate an investigation report.")
-    return report
-
-
-@app.get("/api/investigations")
-def list_investigations_endpoint(limit: int = 50):
-    """List recent investigations."""
-    return list_investigations(limit=limit)
-
-
-@app.get("/api/investigations/{investigation_id}", response_model=InvestigationReport)
-def get_investigation_endpoint(investigation_id: str):
-    """Retrieve full investigation report by ID."""
-    report = get_investigation(investigation_id)
-    if not report:
-        raise HTTPException(status_code=404, detail="Investigation not found.")
     return report
 
 

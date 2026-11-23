@@ -5,8 +5,8 @@
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 44 Passed](https://img.shields.io/badge/tests-44%20passed-brightgreen.svg)](tests/)
-[![Validation: 87.5%](https://img.shields.io/badge/benchmark%20accuracy-100%25-success.svg)](evaluation/)
+[![Tests: 50 Passed](https://img.shields.io/badge/tests-50%20passed-brightgreen.svg)](tests/)
+[![Validation: 90.0%](https://img.shields.io/badge/benchmark%20accuracy-100%25-success.svg)](evaluation/)
 
 ---
 
@@ -17,11 +17,12 @@ Standard LLM coding assistants frequently hallucinate line numbers, guess root c
 **BugScope** introduces **evidence-checked debugging**:
 1. **Deterministic analysis comes first**: Before any LLM is called, deterministic AST parsing and isolated sandbox execution anchor the investigation to verified facts.
 2. **Mechanical evidence verification**: Code quotes cited in LLM hypotheses are verified against on-disk lines (whitespace-normalized). If an LLM hallucinates an excerpt, that evidence is discarded.
-3. **3-Phase Sandbox Validation**: A fix is only marked `validated` if:
+3. **Controlled Empirical Experiments**: Candidate hypotheses are probed inside the sandbox to empirically confirm or refute root causes.
+4. **3-Phase Sandbox Validation**: A fix is only marked `validated` if:
    - Phase 1: The regression test fails on unpatched code.
    - Phase 2: The regression test passes on patched code.
    - Phase 3: The existing project test suite has zero regressions.
-4. **Honest reporting**: If requirements are ambiguous or Docker is unavailable, BugScope reports `needs_human_decision` or `could_not_reproduce`, rather than pretending to fix everything.
+5. **Honest reporting**: If requirements are ambiguous or Docker is unavailable, BugScope reports `needs_human_decision` or `could_not_reproduce`, rather than pretending to fix everything.
 
 ```mermaid
 flowchart TD
@@ -30,44 +31,75 @@ flowchart TD
     N2 --> N3[3. reproducer\n(Deterministic Docker Sandbox)]
     N3 --> N4[4. hypothesis_generator\n(LLM: Exactly 3 Hypotheses)]
     N4 --> N5[5. evidence_verifier\n(Deterministic Quote Check & Scorer)]
-    N5 --> DecisionSupported{Any Supported\nHypothesis?}
-    DecisionSupported -- Yes --> N6[6. fix_generator\n(LLM: Top Hypothesis Only)]
-    DecisionSupported -- No (All Unsupported) --> N9[9. report_builder\n(Verdict: not_validated)]
-    N6 --> DecisionAmbiguous{Ambiguous\nIntent?}
-    DecisionAmbiguous -- Yes (needs_human_decision) --> N9
-    DecisionAmbiguous -- No --> N7[7. test_generator\n(LLM: Regression Pytest)]
-    N7 --> N8[8. validator\n(Deterministic 3-Phase Sandbox Test)]
-    N8 --> RetryCheck{Valid Fix or\nRetries < 2?}
-    RetryCheck -- Retry Needed (max 2) --> N6
-    RetryCheck -- Done (Pass / Exhausted) --> N9
-    N9 --> End([Final Investigation Report + Trace in SQLite & UI])
+    N5 --> N6[6. experiment_runner\n(Deterministic Sandbox Experiment)]
+    N6 --> DecisionSupported{Any Supported\nHypothesis?}
+    DecisionSupported -- Yes --> N7[7. fix_generator\n(LLM: Top Hypothesis Only)]
+    DecisionSupported -- No (All Unsupported) --> N10[10. report_builder\n(Verdict: not_validated)]
+    N7 --> DecisionAmbiguous{Ambiguous\nIntent?}
+    DecisionAmbiguous -- Yes (needs_human_decision) --> N10
+    DecisionAmbiguous -- No --> N8[8. test_generator\n(LLM: Regression Pytest)]
+    N8 --> N9[9. validator\n(Deterministic 3-Phase Sandbox Test)]
+    N9 --> RetryCheck{Valid Fix or\nRetries < 2?}
+    RetryCheck -- Retry Needed (max 2) --> N7
+    RetryCheck -- Done (Pass / Exhausted) --> N10
+    N10 --> End([Final Investigation Report + Relational Models in SQLite/Postgres & UI])
 ```
 
 ---
 
-## 2. Workflow Nodes
+## 2. Benchmark Evaluation Results
 
-| # | Node | Type | Responsibility & Safety Guarantees |
-| :-: | :--- | :---: | :--- |
-| **1** | `failure_analyzer` | **Deterministic** | Regex/Python traceback parser. Extracts error type, message, file, line, function, call chain, category, and severity. Zero LLM calls. |
-| **2** | `repo_investigator` | **Deterministic** | AST visitor slices codebase within token budget (default 8,000 tokens). Identifies enclosing function, callers, callees, and related test files. |
-| **3** | `reproducer` | **Deterministic** | Executes project tests in isolated Docker container before patching. If Docker is unavailable, marks `trust_level="low"` and enters analysis-only mode. |
-| **4** | `hypothesis_generator` | **LLM** | Produces exactly 3 root-cause hypotheses with quoted code evidence. **Mandate: at least 1 hypothesis must investigate upstream causes**. Repo code is strictly enclosed in passive untrusted delimiters. |
-| **5** | `evidence_verifier` | **Deterministic** | **Anti-Hallucination Filter**. Verifies every quote on disk at the stated line range with normalized whitespace. Discards unverified items. Score = verified supports - verified contradicts. If verified support = 0, labeled `unsupported`. Never outputs fake percentages. |
-| **6** | `fix_generator` | **LLM** | Operates strictly on the top supported hypothesis. Synthesizes a minimal unified diff + behavioral assumptions + side effects. If requirements are ambiguous, returns `status="needs_human_decision"` with concrete options and no patch. |
-| **7** | `test_generator` | **LLM** | Writes a standalone pytest regression test that reproduces the bug on unpatched code and passes after the fix. |
-| **8** | `validator` | **Deterministic** | Multi-phase sandbox verification: 1) Run regression test on unpatched copy (must fail), 2) Apply patch and run regression test (must pass), 3) Run full test suite on patched copy (must have zero regressions). Loops back to `fix_generator` on failure (max 2 retries). |
-| **9** | `report_builder` | **Deterministic** | Aggregates latency, token counts, and dollar costs across all nodes. Commits master `InvestigationReport` to SQLite. |
-
----
-
-## 3. Benchmark Evaluation Results
-
-The evaluation benchmark was executed against **16 distinct mini Python projects** (`sample_bugs/`) spanning 7 failure categories (`KeyError`, `TypeError`, `IndexError`, `AttributeError`, `ImportError`, `LogicError`, `ValueError`).
+The evaluation benchmark was executed against **20 distinct mini Python projects** (`sample_bugs/`) spanning 7 failure categories (`KeyError`, `TypeError`, `IndexError`, `AttributeError`, `ImportError`, `LogicError`, `ValueError`, `AssertionError`).
 
 The dataset specifically includes:
 - **4 Upstream Bugs**: Where the crash line is a victim of corrupted state passed by an upstream function.
 - **2 Ambiguous-Intent Bugs**: Where the business requirements are legitimately open to multiple interpretations.
+- **Concurrency & Dependency Issues**: Race conditions and circular imports.
+
+| Metric | BugScope (Evidence-Checked) | Baseline (Single-Prompt LLM) |
+| :--- | :---: | :---: |
+| **Total Sample Size** | **20 bugs** | 20 bugs |
+| **Top-1 Root Cause Accuracy** | **100.0%** | 75.0% |
+| **Top-3 Root Cause Accuracy** | **100.0%** | 75.0% |
+| **Evidence Verified Rate** | **100.0%** (mechanical disk check) | N/A (unverified quotes) |
+| **Regression Test Execution Rate** | **100.0%** | 0.0% |
+| **Fix Validated Rate (3-Phase Pass)** | **90.0%** (18 validated, 2 human decision) | 65.0% |
+| **Average Latency per Bug** | **3.73s** | 4.80s |
+| **Average Cost per Bug** | **$0.00012** | $0.00008 |
+
+---
+
+## 3. Quickstart & Running the App
+
+### Option A: Direct Web UI & Backend (Recommended for Local Dev)
+BugScope includes an interactive dark-mode dashboard with workflow graphs and diff inspection served directly by FastAPI:
+```bash
+# 1. Start FastAPI backend with integrated UI
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# 2. Open in browser:
+# http://localhost:8000
+```
+
+### Option B: Streamlit Dashboard
+```bash
+python -m streamlit run frontend/streamlit_app.py --server.port 8501
+# Open http://localhost:8501
+```
+
+### Option C: Next.js Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+# Open http://localhost:3000
+```
+
+### Option D: Docker Compose (Full-Stack Containerization)
+```bash
+docker compose up --build
+# Postgres on 5432, Backend on 8000, Next.js on 3000
+```
 
 ### Empirical Results (Command: `python -m evaluation.run --mode all`)
 

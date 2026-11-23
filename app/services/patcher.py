@@ -14,6 +14,73 @@ class PatchError(Exception):
     pass
 
 
+class DiffResult:
+    """Result of an in-memory unified diff application."""
+    def __init__(
+        self,
+        success: bool,
+        patched_content: str,
+        error_message: Optional[str] = None,
+        applied_hunks: int = 0,
+    ):
+        self.success = success
+        self.patched_content = patched_content
+        self.error_message = error_message
+        self.applied_hunks = applied_hunks
+
+
+def apply_unified_diff(content: str, diff_text: str) -> DiffResult:
+    """Apply a unified diff directly to an in-memory string.
+
+    Returns:
+        DiffResult with patched_content and success flag.
+    """
+    if not diff_text.strip():
+        return DiffResult(False, content, "Empty diff.")
+
+    patches = parse_unified_diff(diff_text)
+    if not patches:
+        return DiffResult(False, content, "Failed parsing diff hunks.")
+
+    current_content = content
+    hunks_count = 0
+
+    for _, hunks in patches.items():
+        for old_lines, new_lines in hunks:
+            old_str = "\n".join(old_lines)
+            new_str = "\n".join(new_lines)
+
+            if old_str in current_content:
+                current_content = current_content.replace(old_str, new_str, 1)
+                hunks_count += 1
+                continue
+
+            # Whitespace-relaxed match
+            lines = current_content.splitlines()
+            old_norm = [re.sub(r"\s+", " ", l).strip() for l in old_lines if l.strip()]
+            matched = False
+
+            if old_norm:
+                for idx in range(len(lines) - len(old_norm) + 1):
+                    window = [
+                        re.sub(r"\s+", " ", lines[idx + k]).strip()
+                        for k in range(len(old_norm))
+                    ]
+                    if window == old_norm:
+                        before = lines[:idx]
+                        after = lines[idx + len(old_norm) :]
+                        current_content = "\n".join(before + new_lines + after)
+                        matched = True
+                        hunks_count += 1
+                        break
+
+            if not matched:
+                return DiffResult(False, content, f"Could not locate hunk: {old_str[:100]}...")
+
+    return DiffResult(True, current_content, None, hunks_count)
+
+
+
 def parse_unified_diff(diff_text: str) -> Dict[str, List[Tuple[List[str], List[str]]]]:
     """Parse unified diff text into a mapping of file_path -> list of (old_lines, new_lines)."""
     file_patches: Dict[str, List[Tuple[List[str], List[str]]]] = {}

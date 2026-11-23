@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_19_sql_parameter_leak",
+  "root_cause_category": "ValueError",
+  "file": "app/query.py",
+  "line": 3,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "build_user_query rejects single quotes with ValueError."
+}

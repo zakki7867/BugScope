@@ -39,3 +39,6 @@ class FailureReport(BaseModel):
     call_chain: List[CallFrame] = Field(default_factory=list, description="Frames from outermost to innermost")
     category: str = Field(..., description="Failure category string")
     severity: str = Field(default="medium", description="Estimated severity: low, medium, high")
+    raw_traceback: Optional[str] = Field(default=None, description="Original unparsed traceback")
+    test_command: Optional[str] = Field(default=None, description="Failing test command if available")
+    one_sentence_summary: Optional[str] = Field(default=None, description="Summary of failure")

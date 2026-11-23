@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_17_concurrency_race",
+  "root_cause_category": "AssertionError",
+  "file": "app/counter.py",
+  "line": 8,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Counter allows negative count without bounding check."
+}

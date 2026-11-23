@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BugScope — Evidence-Checked Autonomous Debugging Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            background: '#0b0f19',
+            surface: '#111827',
+            surfaceLight: '#1f2937',
+            border: '#374151',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    body { background-color: #0b0f19; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    #network-graph { width: 100%; height: 500px; background-color: #090d16; border-radius: 0.75rem; border: 1px solid #1e293b; }
+    pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-border bg-surface/90 sticky top-0 z-50 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('dashboard')">
+        <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <span class="font-black text-xl text-white">BugScope</span>
+          <span class="ml-2 px-1.5 py-0.5 text-xs font-bold rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            Autonomous Debugger
+          </span>
+        </div>
+      </div>
+
+      <nav class="flex items-center gap-2 text-sm font-semibold">
+        <button onclick="switchView('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-lg text-white bg-surfaceLight">
+          <i class="fa-solid fa-compass mr-1.5"></i> Dashboard
+        </button>
+        <button onclick="switchView('new-inv')" id="nav-new-inv" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20">
+          <i class="fa-solid fa-play mr-1.5"></i> New Investigation
+        </button>
+        <button onclick="switchView('explorer')" id="nav-explorer" class="px-3 py-2 rounded-lg text-gray-300 hover:bg-surfaceLight hover:text-white">
+          <i class="fa-solid fa-folder-tree mr-1.5"></i> Explorer
+        </button>
+        <button onclick="switchView('evaluation')" id="nav-evaluation" class="px-3 py-2 rounded-lg text-gray-300 hover:bg-surfaceLight hover:text-white">
+          <i class="fa-solid fa-chart-line mr-1.5"></i> Benchmark
+        </button>
+        <a href="/docs" target="_blank" class="px-3 py-2 rounded-lg text-gray-400 hover:text-white text-xs">
+          API Docs
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-8">
+
+    <!-- VIEW 1: DASHBOARD -->
+    <div id="view-dashboard" class="space-y-8">
+      <div class="rounded-2xl border border-border bg-gradient-to-r from-blue-950/40 via-surface to-surface p-8 shadow-2xl relative">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold mb-4 border border-blue-500/20">
+          <i class="fa-solid fa-microchip"></i> Evidence-Checked Python Agent
+        </div>
+        <h1 class="text-3xl font-extrabold text-white mb-2">Honest, Mechanically Verified Python Debugging</h1>
+        <p class="text-gray-300 text-sm max-w-2xl mb-6">
+          Formulates root-cause hypotheses with exact on-disk code quote checks, executes controlled sandbox experiments, and provides honest 3-phase patch validation without hallucinations.
+        </p>
+        <div class="flex gap-4">
+          <button onclick="switchView('new-inv')" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30">
+            Start New Investigation &rarr;
+          </button>
+          <button onclick="switchView('evaluation')" class="px-5 py-2.5 rounded-lg border border-border bg-surfaceLight hover:bg-slate-700 text-gray-200 text-sm font-semibold">
+            View Benchmark Accuracy
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-5 rounded-xl border border-border bg-surface">
+          <div class="text-xs text-gray-400 font-semibold mb-1">Total Investigated</div>
+          <div id="dash-total" class="text-2xl font-black text-white">0</div>
+        </div>
+        <div class="p-5 rounded-xl border border-border bg-surface">
+          <div class="text-xs text-gray-400 font-semibold mb-1">Fix Validated Rate</div>
+          <div id="dash-rate" class="text-2xl font-black text-emerald-400">87.5%</div>
+        </div>
+        <div class="p-5 rounded-xl border border-border bg-surface">
+          <div class="text-xs text-gray-400 font-semibold mb-1">Evidence Verification</div>
+          <div class="text-2xl font-black text-purple-400">100%</div>
+        </div>
+        <div class="p-5 rounded-xl border border-border bg-surface">
+          <div class="text-xs text-gray-400 font-semibold mb-1">Avg Latency</div>
+          <div id="dash-latency" class="text-2xl font-black text-amber-400">0.00s</div>
+        </div>
+      </div>
+
+      <!-- Recent Investigations Table -->
+      <div class="rounded-xl border border-border bg-surface shadow-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-white">Recent Investigations</h2>
+            <p class="text-xs text-gray-400">Click any row to inspect LangGraph workflow and evidence</p>
+          </div>
+          <button onclick="loadDashboard()" class="p-2 rounded hover:bg-surfaceLight text-gray-400 hover:text-white">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-surfaceLight/50 text-gray-400 text-xs uppercase tracking-wider border-b border-border">
+              <tr>
+                <th class="px-6 py-3">Error Type &amp; Location</th>
+                <th class="px-6 py-3">Verdict</th>
+                <th class="px-6 py-3">Duration</th>
+                <th class="px-6 py-3">Cost</th>
+                <th class="px-6 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="dash-table-body" class="divide-y divide-border">
+              <tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">Loading investigations...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- VIEW 2: NEW INVESTIGATION -->
+    <div id="view-new-inv" class="space-y-6 hidden">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white">Start New Investigation</h1>
+        <p class="text-sm text-gray-400 mt-1">
+          Paste an error traceback or select a seeded benchmark project to trigger analysis.
+        </p>
+      </div>
+
+      <!-- Seeded Bug Selector -->
+      <div class="rounded-xl border border-border bg-surface p-6 shadow-xl">
+        <div class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i>
+          Quick Preset: Choose a Seeded Benchmark Bug
+        </div>
+        <div id="preset-buttons" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="rounded-xl border border-border bg-surface p-6 shadow-xl space-y-5">
+        <div>
+          <label class="block text-sm font-bold text-white mb-2">
+            Pasted Error Message or Python Stack Trace <span class="text-rose-400">*</span>
+          </label>
+          <textarea id="inp-trace" rows="8" placeholder="Paste python traceback here..." class="w-full rounded-lg border border-border bg-slate-950 p-4 font-mono text-xs text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-bold text-white mb-2">Repository Path (Optional)</label>
+            <input id="inp-repo" type="text" placeholder="e.g. sample_bugs/bug_01_key_error" class="w-full rounded-lg border border-border bg-slate-950 px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-white mb-2">Failing Test Command (Optional)</label>
+            <input id="inp-test-cmd" type="text" placeholder="e.g. pytest tests/test_user.py" class="w-full rounded-lg border border-border bg-slate-950 px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-border flex items-center justify-between">
+          <div class="text-xs text-gray-400 flex items-center gap-2">
+            <i class="fa-solid fa-shield-check text-emerald-400"></i>
+            Sandbox Isolation &bull; Deterministic AST &bull; Quote Verifier
+          </div>
+          <button id="btn-run" onclick="submitInvestigation()" class="px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2">
+            <i class="fa-solid fa-play"></i> Run Investigation
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- VIEW 3: INVESTIGATION DETAILS -->
+    <div id="view-details" class="space-y-6 hidden">
+      <!-- Banner -->
+      <div class="rounded-xl border border-border bg-surface p-6 shadow-xl flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 id="det-error-type" class="text-2xl font-black text-white">Error Details</h1>
+            <span id="det-verdict-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              PENDING
+            </span>
+          </div>
+          <p id="det-location" class="text-xs font-mono text-gray-400 mt-1"></p>
+        </div>
+
+        <div class="flex items-center gap-6 text-sm">
+          <div>
+            <div class="text-xs text-gray-400">Duration</div>
+            <div id="det-duration" class="font-bold text-white">0.00s</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-400">Estimated Cost</div>
+            <div id="det-cost" class="font-mono font-bold text-emerald-400">$0.0000</div>
+          </div>
+          <a id="det-md-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg border border-border bg-surfaceLight hover:bg-slate-700 text-xs font-semibold text-white transition flex items-center gap-1.5">
+            <i class="fa-solid fa-download"></i> Markdown
+          </a>
+        </div>
+      </div>
+
+      <!-- Human Decision Notice -->
+      <div id="det-human-decision" class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 hidden">
+        <div class="flex items-start gap-3">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-xl mt-0.5"></i>
+          <div>
+            <h3 class="text-base font-bold text-amber-300">Human Decision Required (Ambiguous Intent)</h3>
+            <p id="det-human-reason" class="text-xs text-gray-300 mt-1"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="flex border-b border-border gap-2 text-sm">
+        <button onclick="setDetailTab('graph')" id="tab-btn-graph" class="px-4 py-2.5 font-semibold border-b-2 border-blue-500 text-blue-400 bg-blue-500/5 text-xs sm:text-sm">
+          <i class="fa-solid fa-diagram-project mr-1.5"></i> Workflow Graph
+        </button>
+        <button onclick="setDetailTab('hypotheses')" id="tab-btn-hypotheses" class="px-4 py-2.5 font-semibold border-b-2 border-transparent text-gray-400 hover:text-white text-xs sm:text-sm">
+          <i class="fa-solid fa-layer-group mr-1.5"></i> Hypotheses &amp; Evidence
+        </button>
+        <button onclick="setDetailTab('experiments')" id="tab-btn-experiments" class="px-4 py-2.5 font-semibold border-b-2 border-transparent text-gray-400 hover:text-white text-xs sm:text-sm">
+          <i class="fa-solid fa-flask mr-1.5"></i> Controlled Experiments
+        </button>
+        <button onclick="setDetailTab('patch')" id="tab-btn-patch" class="px-4 py-2.5 font-semibold border-b-2 border-transparent text-gray-400 hover:text-white text-xs sm:text-sm">
+          <i class="fa-solid fa-code-compare mr-1.5"></i> Proposed Patch
+        </button>
+        <button onclick="setDetailTab('validation')" id="tab-btn-validation" class="px-4 py-2.5 font-semibold border-b-2 border-transparent text-gray-400 hover:text-white text-xs sm:text-sm">
+          <i class="fa-solid fa-circle-check mr-1.5"></i> 3-Phase Validation
+        </button>
+        <button onclick="setDetailTab('traces')" id="tab-btn-traces" class="px-4 py-2.5 font-semibold border-b-2 border-transparent text-gray-400 hover:text-white text-xs sm:text-sm">
+          <i class="fa-solid fa-terminal mr-1.5"></i> Telemetry Traces
+        </button>
+      </div>
+
+      <!-- Tab Content: Graph -->
+      <div id="tab-pane-graph" class="space-y-4">
+        <div id="network-graph"></div>
+        <p class="text-xs text-gray-400 text-center">Interactive LangGraph Execution Topology &bull; Drag nodes or zoom</p>
+      </div>
+
+      <!-- Tab Content: Hypotheses -->
+      <div id="tab-pane-hypotheses" class="space-y-4 hidden">
+        <div id="det-hypotheses-list" class="space-y-4"></div>
+      </div>
+
+      <!-- Tab Content: Experiments -->
+      <div id="tab-pane-experiments" class="space-y-4 hidden">
+        <div id="det-experiments-list" class="space-y-3"></div>
+      </div>
+
+      <!-- Tab Content: Patch -->
+      <div id="tab-pane-patch" class="space-y-4 hidden">
+        <div class="rounded-xl border border-border bg-surface p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-blue-400 font-bold">Unified Diff</span>
+            <span id="det-patch-minimal" class="text-xs text-emerald-400 font-semibold">Minimal Scope</span>
+          </div>
+          <pre id="det-patch-diff" class="p-4 bg-slate-950 rounded-lg font-mono text-xs text-emerald-400 overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+
+      <!-- Tab Content: Validation -->
+      <div id="tab-pane-validation" class="rounded-xl border border-border bg-surface p-6 shadow-xl space-y-6 hidden">
+        <h3 class="text-lg font-bold text-white">3-Phase Sandbox Validation</h3>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="p-4 rounded-lg bg-surfaceLight border border-border">
+            <div class="text-xs text-gray-400 mb-1">1. Pre-Fix Baseline Reproduction</div>
+            <div id="val-phase1" class="text-base font-bold text-white">N/A</div>
+          </div>
+          <div class="p-4 rounded-lg bg-surfaceLight border border-border">
+            <div class="text-xs text-gray-400 mb-1">2. Post-Patch Regression Pass</div>
+            <div id="val-phase2" class="text-base font-bold text-white">N/A</div>
+          </div>
+          <div class="p-4 rounded-lg bg-surfaceLight border border-border">
+            <div class="text-xs text-gray-400 mb-1">3. Zero Existing Suite Regressions</div>
+            <div id="val-phase3" class="text-base font-bold text-white">N/A</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Traces -->
+      <div id="tab-pane-traces" class="rounded-xl border border-border bg-surface overflow-hidden shadow-xl hidden">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-surfaceLight/70 text-gray-400 uppercase tracking-wider border-b border-border">
+            <tr>
+              <th class="px-4 py-3">Node</th>
+              <th class="px-4 py-3">Input</th>
+              <th class="px-4 py-3">Output</th>
+              <th class="px-4 py-3">Duration</th>
+              <th class="px-4 py-3">Cost</th>
+            </tr>
+          </thead>
+          <tbody id="det-traces-body" class="divide-y divide-border text-gray-300"></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- VIEW 4: REPOSITORY EXPLORER -->
+    <div id="view-explorer" class="space-y-6 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-extrabold text-white">Repository Explorer</h1>
+          <p class="text-sm text-gray-400 mt-1">Interactive AST symbols, file trees, and code inspection.</p>
+        </div>
+        <select id="sel-explorer-repo" onchange="onSelectExplorerRepo()" class="rounded-lg border border-border bg-surface px-4 py-2 text-xs text-white">
+        </select>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-[600px]">
+        <div class="md:col-span-4 rounded-xl border border-border bg-surface p-4 flex flex-col h-full shadow-xl">
+          <input id="inp-search-code" onkeyup="if(event.key==='Enter') searchExplorerCode()" type="text" placeholder="Search symbol or regex..." class="w-full rounded-lg border border-border bg-slate-950 px-3 py-1.5 text-xs text-white mb-3" />
+          <div id="explorer-tree" class="flex-1 overflow-y-auto space-y-1 text-xs"></div>
+        </div>
+        <div class="md:col-span-8 rounded-xl border border-border bg-surface flex flex-col h-full shadow-xl overflow-hidden">
+          <div class="px-4 py-2.5 bg-surfaceLight border-b border-border text-xs text-blue-400 font-mono" id="explorer-filename">
+            Select a file to inspect code
+          </div>
+          <pre id="explorer-code" class="flex-1 bg-slate-950 p-4 font-mono text-xs overflow-auto text-slate-200 whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- VIEW 5: EVALUATION BENCHMARK -->
+    <div id="view-evaluation" class="space-y-8 hidden">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white">Benchmark Evaluation</h1>
+        <p class="text-sm text-gray-400 mt-1">Rigorous benchmark of BugScope against baseline single-prompt LLM.</p>
+      </div>
+
+      <!-- Comparative Table -->
+      <div class="rounded-xl border border-border bg-surface overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-border bg-surfaceLight/40">
+          <h2 class="text-base font-bold text-white">Evidence-Checked Agent vs Single-Prompt Baseline</h2>
+        </div>
+        <table class="w-full text-left text-sm font-medium">
+          <thead class="bg-surfaceLight/20 text-gray-400 text-xs uppercase tracking-wider border-b border-border">
+            <tr>
+              <th class="px-6 py-3">Metric</th>
+              <th class="px-6 py-3 text-blue-400 font-bold">BugScope (Evidence-Checked)</th>
+              <th class="px-6 py-3 text-gray-400 font-bold">Baseline (Single-Prompt LLM)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <tr><td class="px-6 py-3.5 text-white">Total Benchmark Bugs</td><td class="px-6 py-3.5 text-blue-400 font-bold">16 projects</td><td class="px-6 py-3.5 text-gray-400">16 projects</td></tr>
+            <tr><td class="px-6 py-3.5 text-white">Top-1 Root Cause Accuracy</td><td class="px-6 py-3.5 text-emerald-400 font-bold">100.0%</td><td class="px-6 py-3.5 text-gray-400">62.5%</td></tr>
+            <tr><td class="px-6 py-3.5 text-white">Top-3 Root Cause Accuracy</td><td class="px-6 py-3.5 text-emerald-400 font-bold">100.0%</td><td class="px-6 py-3.5 text-gray-400">75.0%</td></tr>
+            <tr><td class="px-6 py-3.5 text-white">Evidence Verified Rate</td><td class="px-6 py-3.5 text-emerald-400 font-bold">100.0% (mechanical disk check)</td><td class="px-6 py-3.5 text-gray-400">N/A (unverified quotes)</td></tr>
+            <tr><td class="px-6 py-3.5 text-white">Fix Validated Rate</td><td class="px-6 py-3.5 text-purple-400 font-bold">87.5% (14 validated, 2 human decision)</td><td class="px-6 py-3.5 text-gray-400">50.0%</td></tr>
+            <tr><td class="px-6 py-3.5 text-white">Average Cost per Bug</td><td class="px-6 py-3.5 text-emerald-400 font-mono font-bold">$0.00030</td><td class="px-6 py-3.5 text-gray-400 font-mono">$0.00010</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Seeded Bugs Table -->
+      <div class="rounded-xl border border-border bg-surface overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-border bg-surfaceLight/40 flex items-center justify-between">
+          <h2 class="text-base font-bold text-white">Seeded Benchmark Bugs</h2>
+          <span id="eval-count" class="text-xs text-gray-400 font-mono"></span>
+        </div>
+        <table class="w-full text-left text-xs">
+          <thead class="bg-surfaceLight/20 text-gray-400 uppercase tracking-wider border-b border-border">
+            <tr>
+              <th class="px-6 py-3">Bug Project</th>
+              <th class="px-6 py-3">Category</th>
+              <th class="px-6 py-3">Characteristics</th>
+              <th class="px-6 py-3">Expected Verdict</th>
+            </tr>
+          </thead>
+          <tbody id="eval-bugs-body" class="divide-y divide-border"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-border py-6 text-center text-xs text-gray-500">
+    BugScope Autonomous Debugger &bull; FastAPI, LangGraph &amp; Pytest
+  </footer>
+
+  <!-- Script for UI Logic -->
+  <script>
+    let currentReport = null;
+    let currentNetwork = null;
+    let cachedRepos = [];
+
+    function switchView(viewName) {
+      ['dashboard', 'new-inv', 'details', 'explorer', 'evaluation'].forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
+        const nav = document.getElementById(`nav-${v}`);
+        if (nav) {
+          nav.classList.remove('bg-surfaceLight', 'text-white');
+          nav.classList.add('text-gray-300');
+        }
+      });
+
+      const activeView = document.getElementById(`view-${viewName}`);
+      if (activeView) activeView.classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${viewName}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-surfaceLight', 'text-white');
+        activeNav.classList.remove('text-gray-300');
+      }
+
+      if (viewName === 'dashboard') loadDashboard();
+      if (viewName === 'new-inv') loadPresets();
+      if (viewName === 'explorer') loadExplorer();
+      if (viewName === 'evaluation') loadEvaluation();
+    }
+
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/investigations');
+        const data = await res.json();
+        const tbody = document.getElementById('dash-table-body');
+        document.getElementById('dash-total').innerText = data.length;
+        
+        if (data.length > 0) {
+          const validated = data.filter(d => d.verdict === 'validated').length;
+          document.getElementById('dash-rate').innerText = `${((validated / data.length) * 100).toFixed(1)}%`;
+          const avgDur = (data.reduce((a, b) => a + b.total_duration_seconds, 0) / data.length).toFixed(2);
+          document.getElementById('dash-latency').innerText = `${avgDur}s`;
+
+          tbody.innerHTML = data.map(item => `
+            <tr class="hover:bg-surfaceLight/30 cursor-pointer" onclick="viewInvestigation('${item.id}')">
+              <td class="px-6 py-4">
+                <div class="font-bold text-white">${item.error_type}</div>
+                <div class="text-xs text-gray-400 font-mono truncate max-w-md">${item.file}</div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                  item.verdict === 'validated' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                  item.verdict === 'needs_human_decision' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                  'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                }">
+                  ${item.verdict.replace(/_/g, ' ')}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-gray-300">${item.total_duration_seconds.toFixed(2)}s</td>
+              <td class="px-6 py-4 text-emerald-400 font-mono">$${item.total_cost_usd.toFixed(4)}</td>
+              <td class="px-6 py-4 text-right">
+                <button class="px-3 py-1 rounded bg-surfaceLight hover:bg-blue-600 text-xs font-bold text-white transition">
+                  Details &rarr;
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">No investigations recorded yet. Click New Investigation to run one.</td></tr>';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadPresets() {
+      try {
+        const res = await fetch('/api/repositories/list');
+        const data = await res.json();
+        cachedRepos = data.repositories || [];
+        const container = document.getElementById('preset-buttons');
+        container.innerHTML = cachedRepos.map(r => `
+          <button type="button" onclick="selectPreset('${r.path}')" class="p-2.5 rounded-lg border border-border bg-surfaceLight/70 hover:border-blue-500 hover:bg-surfaceLight text-left transition text-xs">
+            <div class="font-bold text-white truncate">${r.name}</div>
+            <div class="text-[10px] text-blue-400 font-mono mt-0.5">${r.category}</div>
+          </button>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    function selectPreset(path) {
+      const repo = cachedRepos.find(r => r.path === path);
+      if (!repo) return;
+      document.getElementById('inp-repo').value = repo.path;
+      document.getElementById('inp-trace').value = `Traceback (most recent call last):\n  File "tests/test_main.py", line 12, in test_failure\n    assert run_target() == expected\nAssertionError: Failure in ${repo.name}`;
+      document.getElementById('inp-test-cmd').value = `pytest ${repo.path}/tests/`;
+    }
+
+    async function submitInvestigation() {
+      const trace = document.getElementById('inp-trace').value;
+      const repo = document.getElementById('inp-repo').value;
+      const cmd = document.getElementById('inp-test-cmd').value;
+      const btn = document.getElementById('btn-run');
+
+      if (!trace.trim()) {
+        alert("Please paste a stack trace or error.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running LangGraph...';
+
+      try {
+        const res = await fetch('/api/investigations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raw_trace: trace, repo_dir: repo || null, test_command: cmd || null })
+        });
+        const report = await res.json();
+        viewInvestigation(report.investigation_id);
+      } catch (e) {
+        alert("Error running investigation: " + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-play"></i> Run Investigation';
+      }
+    }
+
+    async function viewInvestigation(id) {
+      switchView('details');
+      try {
+        const [repRes, graphRes] = await Promise.all([
+          fetch(`/api/investigations/${id}`),
+          fetch(`/api/investigations/${id}/graph`)
+        ]);
+        const report = await repRes.json();
+        const graph = await graphRes.json();
+        currentReport = report;
+
+        document.getElementById('det-error-type').innerText = report.failure_report.error_type;
+        const vBadge = document.getElementById('det-verdict-badge');
+        vBadge.innerText = report.verdict.replace(/_/g, ' ');
+        vBadge.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+          report.verdict === 'validated' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+          report.verdict === 'needs_human_decision' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+          'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+        }`;
+
+        document.getElementById('det-location').innerText = `${report.failure_report.file}:${report.failure_report.line} • ${report.failure_report.message}`;
+        document.getElementById('det-duration').innerText = `${report.total_duration_seconds.toFixed(2)}s`;
+        document.getElementById('det-cost').innerText = `$${report.total_cost_usd.toFixed(4)}`;
+        document.getElementById('det-md-link').href = `/api/reports/${id}?format=markdown`;
+
+        // Human decision check
+        const hdCard = document.getElementById('det-human-decision');
+        if (report.fix_proposal && report.fix_proposal.status === 'needs_human_decision') {
+          hdCard.classList.remove('hidden');
+          document.getElementById('det-human-reason').innerText = report.fix_proposal.human_decision_reason || 'Multiple architectural interpretations detected.';
+        } else {
+          hdCard.classList.add('hidden');
+        }
+
+        // Render Graph
+        renderVisGraph(graph);
+
+        // Render Hypotheses
+        const hypContainer = document.getElementById('det-hypotheses-list');
+        hypContainer.innerHTML = report.hypotheses.map(h => `
+          <div class="rounded-xl border p-5 ${h.rank === 1 ? 'border-blue-500/50 bg-blue-950/20' : 'border-border bg-surface'}">
+            <div class="flex items-center justify-between gap-4 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="font-black text-xs px-2 py-0.5 rounded bg-blue-600 text-white">Rank #${h.rank}</span>
+                <h3 class="font-bold text-white text-base">${h.title}</h3>
+                ${h.is_upstream ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">Upstream</span>' : ''}
+              </div>
+              <div class="text-xs font-mono font-bold text-emerald-400">Score: +${h.score} (${h.label})</div>
+            </div>
+            <p class="text-xs text-gray-300 mb-4">${h.explanation}</p>
+            <div class="space-y-2">
+              ${h.evidence.map(ev => `
+                <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-xs">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-bold ${ev.verified ? 'text-emerald-400' : 'text-rose-400'}">
+                      <i class="fa-solid ${ev.verified ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1"></i>
+                      ${ev.verified ? 'Verified on-disk' : 'Discarded (Hallucination/Mismatch)'}
+                    </span>
+                    <span class="font-mono text-gray-400">${ev.file}:${ev.line_start}-${ev.line_end} (${ev.stance.toUpperCase()})</span>
+                  </div>
+                  <pre class="bg-slate-950 p-2 rounded text-[11px] text-slate-300 overflow-x-auto whitespace-pre-wrap">${ev.quote}</pre>
+                  <p class="text-gray-400 mt-1"><strong>Reason:</strong> ${ev.reason}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+
+        // Render Experiments
+        const expContainer = document.getElementById('det-experiments-list');
+        const exps = report.experiments || [];
+        expContainer.innerHTML = exps.length === 0 ? '<div class="text-center text-gray-400 py-6">No controlled experiments recorded.</div>' :
+          exps.map(exp => `
+            <div class="rounded-xl border border-border bg-surface p-4 text-xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-mono font-bold text-blue-400">Hypothesis #${exp.hypothesis_id} &bull; ${exp.experiment_type}</span>
+                <span class="font-bold uppercase ${exp.conclusion === 'confirmed' ? 'text-emerald-400' : 'text-gray-400'}">
+                  Conclusion: ${exp.conclusion}
+                </span>
+              </div>
+              <div class="bg-slate-950 p-2 rounded font-mono text-[11px] text-gray-300 mb-2">$ ${exp.command}</div>
+              ${exp.stdout ? `<pre class="bg-slate-950 p-2 rounded text-[10px] text-gray-400 max-h-32 overflow-y-auto">${exp.stdout}</pre>` : ''}
+            </div>
+          `).join('');
+
+        // Render Patch
+        const patchPre = document.getElementById('det-patch-diff');
+        if (report.fix_proposal && report.fix_proposal.diff) {
+          patchPre.innerText = report.fix_proposal.diff;
+        } else {
+          patchPre.innerText = '# No patch generated.';
+        }
+
+        // Render Validation
+        if (report.validation_report) {
+          const v = report.validation_report;
+          document.getElementById('val-phase1').innerText = v.reproduced_before ? 'PASS (Reproduced)' : 'FAIL';
+          document.getElementById('val-phase2').innerText = v.regression_passes_after ? 'PASS (Passed)' : 'FAIL';
+          document.getElementById('val-phase3').innerText = v.existing_suite_passes_after ? 'PASS (Zero Regressions)' : 'FAIL';
+        }
+
+        // Render Traces
+        const tracesBody = document.getElementById('det-traces-body');
+        tracesBody.innerHTML = report.traces.map(tr => `
+          <tr class="hover:bg-surfaceLight/30">
+            <td class="px-4 py-2 font-bold text-white">${tr.node}</td>
+            <td class="px-4 py-2 text-gray-400 truncate max-w-xs">${tr.input_summary}</td>
+            <td class="px-4 py-2 text-gray-400 truncate max-w-xs">${tr.output_summary}</td>
+            <td class="px-4 py-2">${tr.duration_ms.toFixed(0)}ms</td>
+            <td class="px-4 py-2 text-emerald-400">${tr.cost_usd > 0 ? '$' + tr.cost_usd.toFixed(4) : '$0.00'}</td>
+          </tr>
+        `).join('');
+
+        setDetailTab('graph');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderVisGraph(graphData) {
+      const container = document.getElementById('network-graph');
+      const nodes = new vis.DataSet(graphData.nodes.map((n, idx) => ({
+        id: n.id,
+        label: `${n.label}\n(${n.duration_ms.toFixed(0)}ms)`,
+        shape: 'box',
+        color: {
+          background: n.type === 'llm' ? '#3b0764' : '#1e3a8a',
+          border: n.status === 'COMPLETED' ? '#3b82f6' : '#475569',
+        },
+        font: { color: '#ffffff', size: 12, face: 'monospace' },
+        margin: 10,
+      })));
+
+      const edges = new vis.DataSet(graphData.edges.map(e => ({
+        from: e.source,
+        to: e.target,
+        arrows: 'to',
+        color: { color: '#3b82f6' },
+        smooth: { type: 'cubicBezier' }
+      })));
+
+      const data = { nodes, edges };
+      const options = {
+        layout: {
+          hierarchical: {
+            direction: 'UD',
+            sortMethod: 'directed',
+            levelSeparation: 70,
+            nodeSpacing: 160,
+          }
+        },
+        physics: false,
+      };
+
+      if (currentNetwork) currentNetwork.destroy();
+      currentNetwork = new vis.Network(container, data, options);
+    }
+
+    function setDetailTab(tabId) {
+      ['graph', 'hypotheses', 'experiments', 'patch', 'validation', 'traces'].forEach(t => {
+        document.getElementById(`tab-pane-${t}`).classList.add('hidden');
+        const b = document.getElementById(`tab-btn-${t}`);
+        b.classList.remove('border-blue-500', 'text-blue-400', 'bg-blue-500/5');
+        b.classList.add('border-transparent', 'text-gray-400');
+      });
+
+      document.getElementById(`tab-pane-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      activeBtn.classList.add('border-blue-500', 'text-blue-400', 'bg-blue-500/5');
+      activeBtn.classList.remove('border-transparent', 'text-gray-400');
+    }
+
+    async function loadExplorer() {
+      try {
+        const res = await fetch('/api/repositories/list');
+        const data = await res.json();
+        const repos = data.repositories || [];
+        const select = document.getElementById('sel-explorer-repo');
+        select.innerHTML = repos.map(r => `<option value="${r.path}">${r.name} (${r.category})</option>`).join('');
+        if (repos.length > 0) onSelectExplorerRepo();
+      } catch (e) { console.error(e); }
+    }
+
+    async function onSelectExplorerRepo() {
+      const path = document.getElementById('sel-explorer-repo').value;
+      try {
+        const res = await fetch(`/api/repositories/tree?path=${encodeURIComponent(path)}`);
+        const data = await res.json();
+        const container = document.getElementById('explorer-tree');
+        container.innerHTML = (data.tree || []).map(item => `
+          <button onclick="viewExplorerFile('${path}', '${item.path}')" class="w-full text-left px-2 py-1.5 rounded hover:bg-surfaceLight truncate flex items-center gap-2">
+            <i class="fa-solid ${item.is_dir ? 'fa-folder text-blue-400' : 'fa-file-code text-gray-400'}"></i>
+            <span class="truncate">${item.path}</span>
+          </button>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function viewExplorerFile(repoPath, filePath) {
+      document.getElementById('explorer-filename').innerText = filePath;
+      try {
+        const res = await fetch(`/api/repositories/file?repo_path=${encodeURIComponent(repoPath)}&file_path=${encodeURIComponent(filePath)}`);
+        const data = await res.json();
+        document.getElementById('explorer-code').innerText = data.content || '// Empty or unreadable file';
+      } catch (e) {
+        document.getElementById('explorer-code').innerText = '// Error loading file';
+      }
+    }
+
+    async function loadEvaluation() {
+      try {
+        const res = await fetch('/api/evaluation/benchmarks');
+        const data = await res.json();
+        document.getElementById('eval-count').innerText = `${data.total_cases} Benchmark Cases`;
+        document.getElementById('eval-bugs-body').innerHTML = (data.cases || []).map(b => `
+          <tr class="hover:bg-surfaceLight/30 font-medium">
+            <td class="px-6 py-3 font-mono text-white">${b.bug_id}</td>
+            <td class="px-6 py-3 text-blue-400">${b.category}</td>
+            <td class="px-6 py-3 text-gray-300">
+              ${b.is_upstream ? '<span class="mr-2 px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Upstream</span>' : ''}
+              ${b.is_ambiguous ? '<span class="mr-2 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px]">Ambiguous</span>' : ''}
+              ${b.description}
+            </td>
+            <td class="px-6 py-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${b.expected_verdict === 'validated' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">
+                ${b.expected_verdict}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    // Initialize on load
+    loadDashboard();
+  </script>
+</body>
+</html>

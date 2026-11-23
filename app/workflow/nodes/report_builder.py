@@ -67,6 +67,7 @@ def report_builder(state: BugScopeState, db_path: str = None) -> Dict[str, Any]:
         context_bundle=state.get("context_bundle"),
         reproduction_result=state.get("reproduction_result"),
         hypotheses=state.get("ranked_hypotheses", []),
+        experiments=state.get("experiments", []),
         top_hypothesis=state.get("top_hypothesis"),
         fix_proposal=state.get("fix_proposal"),
         regression_test=state.get("regression_test"),

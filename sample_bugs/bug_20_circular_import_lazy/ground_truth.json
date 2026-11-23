@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_20_circular_import_lazy",
+  "root_cause_category": "ImportError",
+  "file": "app/service_b.py",
+  "line": 1,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Circular dependency between service_a and service_b at top-level import."
+}

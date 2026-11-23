@@ -5,6 +5,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from app.schemas.context import ContextBundle
+from app.schemas.experiment import ExperimentResult
 from app.schemas.failure import FailureReport
 from app.schemas.fix import FixProposal, RegressionTest
 from app.schemas.hypothesis import RankedHypothesis
@@ -39,6 +40,9 @@ class InvestigationReport(BaseModel):
     )
     hypotheses: List[RankedHypothesis] = Field(
         default_factory=list, description="All candidate hypotheses ranked mechanically"
+    )
+    experiments: List[ExperimentResult] = Field(
+        default_factory=list, description="Controlled experiment executions"
     )
     top_hypothesis: Optional[RankedHypothesis] = Field(
         default=None, description="Top-ranked supported hypothesis (if any)"

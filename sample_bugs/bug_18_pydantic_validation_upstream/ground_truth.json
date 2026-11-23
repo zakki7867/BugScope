@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_18_pydantic_validation_upstream",
+  "root_cause_category": "ValueError",
+  "file": "app/parser.py",
+  "line": 3,
+  "is_upstream": true,
+  "is_ambiguous": false,
+  "notes": "Upstream parse_payload fails with ValueError converting ISO timestamp string to int."
+}
