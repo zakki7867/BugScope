@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_09_upstream_order",
+  "root_cause_category": "TypeError",
+  "file": "app/queue.py",
+  "line": 4,
+  "is_upstream": true,
+  "is_ambiguous": false,
+  "notes": "Upstream queue worker serializes duration as string."
+}

@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_15_cache_attribute",
+  "root_cause_category": "AttributeError",
+  "file": "app/cache.py",
+  "line": 5,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Calling .seconds attribute on integer timestamp instead of timedelta."
+}

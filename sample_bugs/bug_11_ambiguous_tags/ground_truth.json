@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_11_ambiguous_tags",
+  "root_cause_category": "ValueError",
+  "file": "app/tags.py",
+  "line": 5,
+  "is_upstream": false,
+  "is_ambiguous": true,
+  "notes": "Ambiguous policy whether empty tags should return ['default'] or raise ValueError."
+}

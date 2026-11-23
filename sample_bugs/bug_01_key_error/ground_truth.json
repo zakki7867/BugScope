@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_01_key_error",
+  "root_cause_category": "KeyError",
+  "file": "app/user.py",
+  "line": 6,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Accessing missing key 'email' directly without checking."
+}

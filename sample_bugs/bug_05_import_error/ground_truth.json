@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_05_import_error",
+  "root_cause_category": "ImportError",
+  "file": "app/importer.py",
+  "line": 2,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Importing deprecated cgi module in Python 3.11/3.13."
+}

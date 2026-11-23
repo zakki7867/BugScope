@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_12_matrix_index",
+  "root_cause_category": "IndexError",
+  "file": "app/matrix.py",
+  "line": 6,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Matrix transpose accesses row index on non-square matrix."
+}

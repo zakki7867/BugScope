@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_10_ambiguous_rounding",
+  "root_cause_category": "LogicError",
+  "file": "app/rounding.py",
+  "line": 5,
+  "is_upstream": false,
+  "is_ambiguous": true,
+  "notes": "Ambiguous financial rounding policy (half-up vs bankers rounding). Needs human decision."
+}

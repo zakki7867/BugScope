@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_16_sanitizer_logic",
+  "root_cause_category": "LogicError",
+  "file": "app/sanitizer.py",
+  "line": 5,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Regex logic strips international unicode characters improperly."
+}

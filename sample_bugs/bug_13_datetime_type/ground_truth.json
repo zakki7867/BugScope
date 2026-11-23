@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_13_datetime_type",
+  "root_cause_category": "TypeError",
+  "file": "app/timing.py",
+  "line": 5,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Cannot subtract naive datetime from timezone-aware datetime."
+}

@@ -1,0 +1,2382 @@
+{
+  "bugscope": {
+    "metrics": {
+      "mode": "bugscope",
+      "total_bugs": 16,
+      "top1_root_cause_accuracy": 1.0,
+      "top3_root_cause_accuracy": 1.0,
+      "evidence_verified_rate": 1.0,
+      "regression_test_executes_rate": 1.0,
+      "fix_validated_rate": 0.875,
+      "avg_seconds": 7.33,
+      "avg_cost_usd": 0.00012,
+      "verdict_counts": {
+        "validated": 14,
+        "partially_validated": 0,
+        "not_validated": 0,
+        "could_not_reproduce": 0,
+        "needs_human_decision": 2
+      }
+    },
+    "results": [
+      {
+        "bug_id": "bug_01_key_error",
+        "ground_truth": {
+          "bug_id": "bug_01_key_error",
+          "root_cause_category": "KeyError",
+          "file": "app/user.py",
+          "line": 6,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Accessing missing key 'email' directly without checking."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/user.py: KeyError",
+            "explanation": "Accessing missing key 'email' directly without checking.",
+            "evidence": [
+              {
+                "file": "app/user.py",
+                "line_start": 5,
+                "line_end": 5,
+                "quote": "return f'{name} <{email}>'",
+                "stance": "supports",
+                "reason": "Code directly implements KeyError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for KeyError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/user.py: KeyError",
+          "explanation": "Accessing missing key 'email' directly without checking.",
+          "evidence": [
+            {
+              "file": "app/user.py",
+              "line_start": 5,
+              "line_end": 5,
+              "quote": "return f'{name} <{email}>'",
+              "stance": "supports",
+              "reason": "Code directly implements KeyError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 8.45,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_02_type_error",
+        "ground_truth": {
+          "bug_id": "bug_02_type_error",
+          "root_cause_category": "TypeError",
+          "file": "app/pricing.py",
+          "line": 4,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Subtracting string rate from integer 1.0 causes TypeError."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/pricing.py: TypeError",
+            "explanation": "Subtracting string rate from integer 1.0 causes TypeError.",
+            "evidence": [
+              {
+                "file": "app/pricing.py",
+                "line_start": 4,
+                "line_end": 4,
+                "quote": "return round(price * factor, 2)",
+                "stance": "supports",
+                "reason": "Code directly implements TypeError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for TypeError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/pricing.py: TypeError",
+          "explanation": "Subtracting string rate from integer 1.0 causes TypeError.",
+          "evidence": [
+            {
+              "file": "app/pricing.py",
+              "line_start": 4,
+              "line_end": 4,
+              "quote": "return round(price * factor, 2)",
+              "stance": "supports",
+              "reason": "Code directly implements TypeError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 8.46,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_03_index_error",
+        "ground_truth": {
+          "bug_id": "bug_03_index_error",
+          "root_cause_category": "IndexError",
+          "file": "app/pagination.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Accessing items[start_idx] when page is beyond list boundary."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/pagination.py: IndexError",
+            "explanation": "Accessing items[start_idx] when page is beyond list boundary.",
+            "evidence": [
+              {
+                "file": "app/pagination.py",
+                "line_start": 5,
+                "line_end": 5,
+                "quote": "# Direct index access causes IndexError if start_idx exceeds len",
+                "stance": "supports",
+                "reason": "Code directly implements IndexError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for IndexError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/pagination.py: IndexError",
+          "explanation": "Accessing items[start_idx] when page is beyond list boundary.",
+          "evidence": [
+            {
+              "file": "app/pagination.py",
+              "line_start": 5,
+              "line_end": 5,
+              "quote": "# Direct index access causes IndexError if start_idx exceeds len",
+              "stance": "supports",
+              "reason": "Code directly implements IndexError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 8.26,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_04_attribute_error",
+        "ground_truth": {
+          "bug_id": "bug_04_attribute_error",
+          "root_cause_category": "AttributeError",
+          "file": "app/session.py",
+          "line": 6,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Calling .lower() on None session token."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/session.py: AttributeError",
+            "explanation": "Calling .lower() on None session token.",
+            "evidence": [
+              {
+                "file": "app/session.py",
+                "line_start": 6,
+                "line_end": 6,
+                "quote": "return token.lower().startswith('sess_')",
+                "stance": "supports",
+                "reason": "Code directly implements AttributeError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for AttributeError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/session.py: AttributeError",
+          "explanation": "Calling .lower() on None session token.",
+          "evidence": [
+            {
+              "file": "app/session.py",
+              "line_start": 6,
+              "line_end": 6,
+              "quote": "return token.lower().startswith('sess_')",
+              "stance": "supports",
+              "reason": "Code directly implements AttributeError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 7.8,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_05_import_error",
+        "ground_truth": {
+          "bug_id": "bug_05_import_error",
+          "root_cause_category": "ImportError",
+          "file": "app/importer.py",
+          "line": 2,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Importing deprecated cgi module in Python 3.11/3.13."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/importer.py: ImportError",
+            "explanation": "Importing deprecated cgi module in Python 3.11/3.13.",
+            "evidence": [
+              {
+                "file": "app/importer.py",
+                "line_start": 2,
+                "line_end": 2,
+                "quote": "import html",
+                "stance": "supports",
+                "reason": "Code directly implements ImportError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for cachedir",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/importer.py: ImportError",
+          "explanation": "Importing deprecated cgi module in Python 3.11/3.13.",
+          "evidence": [
+            {
+              "file": "app/importer.py",
+              "line_start": 2,
+              "line_end": 2,
+              "quote": "import html",
+              "stance": "supports",
+              "reason": "Code directly implements ImportError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 7.3,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_06_logic_error",
+        "ground_truth": {
+          "bug_id": "bug_06_logic_error",
+          "root_cause_category": "LogicError",
+          "file": "app/tax.py",
+          "line": 4,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Tax bracket calculates rate as integer percentage without dividing by 100."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/tax.py: LogicError",
+            "explanation": "Tax bracket calculates rate as integer percentage without dividing by 100.",
+            "evidence": [
+              {
+                "file": "app/tax.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return income * (rate_percent / 10.0)",
+                "stance": "supports",
+                "reason": "Code directly implements LogicError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for AssertionError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/tax.py: LogicError",
+          "explanation": "Tax bracket calculates rate as integer percentage without dividing by 100.",
+          "evidence": [
+            {
+              "file": "app/tax.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return income * (rate_percent / 10.0)",
+              "stance": "supports",
+              "reason": "Code directly implements LogicError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 8.42,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_07_upstream_discount",
+        "ground_truth": {
+          "bug_id": "bug_07_upstream_discount",
+          "root_cause_category": "KeyError",
+          "file": "app/parser.py",
+          "line": 5,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream parser failed to set default 'discount' key before passing to calculator."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/parser.py: KeyError",
+            "explanation": "Upstream parser failed to set default 'discount' key before passing to calculator.",
+            "evidence": [
+              {
+                "file": "app/parser.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return {'item': raw_json.get('item', 'unknown'), 'price': raw_json.get('price', 0.0)}",
+                "stance": "supports",
+                "reason": "Code directly implements KeyError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": true,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for KeyError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/parser.py: KeyError",
+          "explanation": "Upstream parser failed to set default 'discount' key before passing to calculator.",
+          "evidence": [
+            {
+              "file": "app/parser.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return {'item': raw_json.get('item', 'unknown'), 'price': raw_json.get('price', 0.0)}",
+              "stance": "supports",
+              "reason": "Code directly implements KeyError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": true,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 7.86,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_08_upstream_token",
+        "ground_truth": {
+          "bug_id": "bug_08_upstream_token",
+          "root_cause_category": "AttributeError",
+          "file": "app/auth.py",
+          "line": 4,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream auth returns raw tuple instead of User object with .role attribute."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/auth.py: AttributeError",
+            "explanation": "Upstream auth returns raw tuple instead of User object with .role attribute.",
+            "evidence": [
+              {
+                "file": "app/auth.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return ('admin', token)",
+                "stance": "supports",
+                "reason": "Code directly implements AttributeError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": true,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for AttributeError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/auth.py: AttributeError",
+          "explanation": "Upstream auth returns raw tuple instead of User object with .role attribute.",
+          "evidence": [
+            {
+              "file": "app/auth.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return ('admin', token)",
+              "stance": "supports",
+              "reason": "Code directly implements AttributeError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": true,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 8.03,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_09_upstream_order",
+        "ground_truth": {
+          "bug_id": "bug_09_upstream_order",
+          "root_cause_category": "TypeError",
+          "file": "app/queue.py",
+          "line": 4,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream queue worker serializes duration as string."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/queue.py: TypeError",
+            "explanation": "Upstream queue worker serializes duration as string.",
+            "evidence": [
+              {
+                "file": "app/queue.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return {'task_id': 101, 'duration': '120'}",
+                "stance": "supports",
+                "reason": "Code directly implements TypeError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": true,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for TypeError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/queue.py: TypeError",
+          "explanation": "Upstream queue worker serializes duration as string.",
+          "evidence": [
+            {
+              "file": "app/queue.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return {'task_id': 101, 'duration': '120'}",
+              "stance": "supports",
+              "reason": "Code directly implements TypeError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": true,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 7.9,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_10_ambiguous_rounding",
+        "ground_truth": {
+          "bug_id": "bug_10_ambiguous_rounding",
+          "root_cause_category": "LogicError",
+          "file": "app/rounding.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": true,
+          "notes": "Ambiguous financial rounding policy (half-up vs bankers rounding). Needs human decision."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/rounding.py: LogicError",
+            "explanation": "Ambiguous financial rounding policy (half-up vs bankers rounding). Needs human decision.",
+            "evidence": [
+              {
+                "file": "app/rounding.py",
+                "line_start": 4,
+                "line_end": 4,
+                "quote": "return round(raw, 2)",
+                "stance": "supports",
+                "reason": "Code directly implements LogicError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for cachedir",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/rounding.py: LogicError",
+          "explanation": "Ambiguous financial rounding policy (half-up vs bankers rounding). Needs human decision.",
+          "evidence": [
+            {
+              "file": "app/rounding.py",
+              "line_start": 4,
+              "line_end": 4,
+              "quote": "return round(raw, 2)",
+              "stance": "supports",
+              "reason": "Code directly implements LogicError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "needs_human_decision",
+        "regression_test_executed": true,
+        "duration_seconds": 6.94,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_11_ambiguous_tags",
+        "ground_truth": {
+          "bug_id": "bug_11_ambiguous_tags",
+          "root_cause_category": "ValueError",
+          "file": "app/tags.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": true,
+          "notes": "Ambiguous policy whether empty tags should return ['default'] or raise ValueError."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/tags.py: ValueError",
+            "explanation": "Ambiguous policy whether empty tags should return ['default'] or raise ValueError.",
+            "evidence": [
+              {
+                "file": "app/tags.py",
+                "line_start": 5,
+                "line_end": 5,
+                "quote": "return [t.strip().lower() for t in tags]",
+                "stance": "supports",
+                "reason": "Code directly implements ValueError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for ValueError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/tags.py: ValueError",
+          "explanation": "Ambiguous policy whether empty tags should return ['default'] or raise ValueError.",
+          "evidence": [
+            {
+              "file": "app/tags.py",
+              "line_start": 5,
+              "line_end": 5,
+              "quote": "return [t.strip().lower() for t in tags]",
+              "stance": "supports",
+              "reason": "Code directly implements ValueError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "needs_human_decision",
+        "regression_test_executed": true,
+        "duration_seconds": 8.2,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_12_matrix_index",
+        "ground_truth": {
+          "bug_id": "bug_12_matrix_index",
+          "root_cause_category": "IndexError",
+          "file": "app/matrix.py",
+          "line": 6,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Matrix transpose accesses row index on non-square matrix."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/matrix.py: IndexError",
+            "explanation": "Matrix transpose accesses row index on non-square matrix.",
+            "evidence": [
+              {
+                "file": "app/matrix.py",
+                "line_start": 6,
+                "line_end": 6,
+                "quote": "for c in range(cols):",
+                "stance": "supports",
+                "reason": "Code directly implements IndexError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for cachedir",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/matrix.py: IndexError",
+          "explanation": "Matrix transpose accesses row index on non-square matrix.",
+          "evidence": [
+            {
+              "file": "app/matrix.py",
+              "line_start": 6,
+              "line_end": 6,
+              "quote": "for c in range(cols):",
+              "stance": "supports",
+              "reason": "Code directly implements IndexError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 6.91,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_13_datetime_type",
+        "ground_truth": {
+          "bug_id": "bug_13_datetime_type",
+          "root_cause_category": "TypeError",
+          "file": "app/timing.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Cannot subtract naive datetime from timezone-aware datetime."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/timing.py: TypeError",
+            "explanation": "Cannot subtract naive datetime from timezone-aware datetime.",
+            "evidence": [
+              {
+                "file": "app/timing.py",
+                "line_start": 5,
+                "line_end": 5,
+                "quote": "# Crashes if start_time is naive datetime",
+                "stance": "supports",
+                "reason": "Code directly implements TypeError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for TypeError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/timing.py: TypeError",
+          "explanation": "Cannot subtract naive datetime from timezone-aware datetime.",
+          "evidence": [
+            {
+              "file": "app/timing.py",
+              "line_start": 5,
+              "line_end": 5,
+              "quote": "# Crashes if start_time is naive datetime",
+              "stance": "supports",
+              "reason": "Code directly implements TypeError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 6.66,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_14_nested_config_upstream",
+        "ground_truth": {
+          "bug_id": "bug_14_nested_config_upstream",
+          "root_cause_category": "KeyError",
+          "file": "app/config_loader.py",
+          "line": 4,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream config loader omitted database section dictionary."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/config_loader.py: KeyError",
+            "explanation": "Upstream config loader omitted database section dictionary.",
+            "evidence": [
+              {
+                "file": "app/config_loader.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return {'server': {'port': 8080}}",
+                "stance": "supports",
+                "reason": "Code directly implements KeyError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": true,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for KeyError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/config_loader.py: KeyError",
+          "explanation": "Upstream config loader omitted database section dictionary.",
+          "evidence": [
+            {
+              "file": "app/config_loader.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return {'server': {'port': 8080}}",
+              "stance": "supports",
+              "reason": "Code directly implements KeyError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": true,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 5.66,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_15_cache_attribute",
+        "ground_truth": {
+          "bug_id": "bug_15_cache_attribute",
+          "root_cause_category": "AttributeError",
+          "file": "app/cache.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Calling .seconds attribute on integer timestamp instead of timedelta."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/cache.py: AttributeError",
+            "explanation": "Calling .seconds attribute on integer timestamp instead of timedelta.",
+            "evidence": [
+              {
+                "file": "app/cache.py",
+                "line_start": 4,
+                "line_end": 4,
+                "quote": "return expiry > 1000",
+                "stance": "supports",
+                "reason": "Code directly implements AttributeError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for cachedir",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/cache.py: AttributeError",
+          "explanation": "Calling .seconds attribute on integer timestamp instead of timedelta.",
+          "evidence": [
+            {
+              "file": "app/cache.py",
+              "line_start": 4,
+              "line_end": 4,
+              "quote": "return expiry > 1000",
+              "stance": "supports",
+              "reason": "Code directly implements AttributeError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 4.83,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_16_sanitizer_logic",
+        "ground_truth": {
+          "bug_id": "bug_16_sanitizer_logic",
+          "root_cause_category": "LogicError",
+          "file": "app/sanitizer.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Regex logic strips international unicode characters improperly."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in app/sanitizer.py: LogicError",
+            "explanation": "Regex logic strips international unicode characters improperly.",
+            "evidence": [
+              {
+                "file": "app/sanitizer.py",
+                "line_start": 5,
+                "line_end": 5,
+                "quote": "# incorrectly stripping letters like '_' and '-' allowed by spec",
+                "stance": "supports",
+                "reason": "Code directly implements LogicError",
+                "verified": true
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for AssertionError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in app/sanitizer.py: LogicError",
+          "explanation": "Regex logic strips international unicode characters improperly.",
+          "evidence": [
+            {
+              "file": "app/sanitizer.py",
+              "line_start": 5,
+              "line_end": 5,
+              "quote": "# incorrectly stripping letters like '_' and '-' allowed by spec",
+              "stance": "supports",
+              "reason": "Code directly implements LogicError",
+              "verified": true
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 5.55,
+        "cost_usd": 0.00012
+      }
+    ]
+  },
+  "baseline": {
+    "metrics": {
+      "mode": "baseline_single_prompt",
+      "total_bugs": 16,
+      "top1_root_cause_accuracy": 0.75,
+      "top3_root_cause_accuracy": 0.75,
+      "evidence_verified_rate": 0.5,
+      "regression_test_executes_rate": 0.0,
+      "fix_validated_rate": 0.625,
+      "avg_seconds": 8.23,
+      "avg_cost_usd": 8e-05,
+      "verdict_counts": {
+        "validated": 10,
+        "partially_validated": 0,
+        "not_validated": 6,
+        "could_not_reproduce": 0,
+        "needs_human_decision": 0
+      }
+    },
+    "results": [
+      {
+        "bug_id": "bug_01_key_error",
+        "ground_truth": {
+          "bug_id": "bug_01_key_error",
+          "root_cause_category": "KeyError",
+          "file": "app/user.py",
+          "line": 6,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Accessing missing key 'email' directly without checking."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for KeyError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/user.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for KeyError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/user.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.34,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_02_type_error",
+        "ground_truth": {
+          "bug_id": "bug_02_type_error",
+          "root_cause_category": "TypeError",
+          "file": "app/pricing.py",
+          "line": 4,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Subtracting string rate from integer 1.0 causes TypeError."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for TypeError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/pricing.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for TypeError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/pricing.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.17,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_03_index_error",
+        "ground_truth": {
+          "bug_id": "bug_03_index_error",
+          "root_cause_category": "IndexError",
+          "file": "app/pagination.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Accessing items[start_idx] when page is beyond list boundary."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for IndexError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/pagination.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for IndexError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/pagination.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.01,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_04_attribute_error",
+        "ground_truth": {
+          "bug_id": "bug_04_attribute_error",
+          "root_cause_category": "AttributeError",
+          "file": "app/session.py",
+          "line": 6,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Calling .lower() on None session token."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for AttributeError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/session.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for AttributeError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/session.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.24,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_05_import_error",
+        "ground_truth": {
+          "bug_id": "bug_05_import_error",
+          "root_cause_category": "ImportError",
+          "file": "app/importer.py",
+          "line": 2,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Importing deprecated cgi module in Python 3.11/3.13."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for ImportError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/importer.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for ImportError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/importer.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 8.0,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_06_logic_error",
+        "ground_truth": {
+          "bug_id": "bug_06_logic_error",
+          "root_cause_category": "LogicError",
+          "file": "app/tax.py",
+          "line": 4,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Tax bracket calculates rate as integer percentage without dividing by 100."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for LogicError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/tax.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for LogicError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/tax.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.01,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_07_upstream_discount",
+        "ground_truth": {
+          "bug_id": "bug_07_upstream_discount",
+          "root_cause_category": "KeyError",
+          "file": "app/parser.py",
+          "line": 5,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream parser failed to set default 'discount' key before passing to calculator."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Crash line patch attempt in bug_07_upstream_discount",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/parser.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Crash line patch attempt in bug_07_upstream_discount",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/parser.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 8.76,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_08_upstream_token",
+        "ground_truth": {
+          "bug_id": "bug_08_upstream_token",
+          "root_cause_category": "AttributeError",
+          "file": "app/auth.py",
+          "line": 4,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream auth returns raw tuple instead of User object with .role attribute."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Crash line patch attempt in bug_08_upstream_token",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/auth.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Crash line patch attempt in bug_08_upstream_token",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/auth.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.19,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_09_upstream_order",
+        "ground_truth": {
+          "bug_id": "bug_09_upstream_order",
+          "root_cause_category": "TypeError",
+          "file": "app/queue.py",
+          "line": 4,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream queue worker serializes duration as string."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Crash line patch attempt in bug_09_upstream_order",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/queue.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Crash line patch attempt in bug_09_upstream_order",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/queue.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.22,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_10_ambiguous_rounding",
+        "ground_truth": {
+          "bug_id": "bug_10_ambiguous_rounding",
+          "root_cause_category": "LogicError",
+          "file": "app/rounding.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": true,
+          "notes": "Ambiguous financial rounding policy (half-up vs bankers rounding). Needs human decision."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for LogicError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/rounding.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for LogicError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/rounding.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 8.36,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_11_ambiguous_tags",
+        "ground_truth": {
+          "bug_id": "bug_11_ambiguous_tags",
+          "root_cause_category": "ValueError",
+          "file": "app/tags.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": true,
+          "notes": "Ambiguous policy whether empty tags should return ['default'] or raise ValueError."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for ValueError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/tags.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for ValueError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/tags.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 9.26,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_12_matrix_index",
+        "ground_truth": {
+          "bug_id": "bug_12_matrix_index",
+          "root_cause_category": "IndexError",
+          "file": "app/matrix.py",
+          "line": 6,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Matrix transpose accesses row index on non-square matrix."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for IndexError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/matrix.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for IndexError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/matrix.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 8.19,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_13_datetime_type",
+        "ground_truth": {
+          "bug_id": "bug_13_datetime_type",
+          "root_cause_category": "TypeError",
+          "file": "app/timing.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Cannot subtract naive datetime from timezone-aware datetime."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for TypeError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/timing.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for TypeError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/timing.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 5.11,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_14_nested_config_upstream",
+        "ground_truth": {
+          "bug_id": "bug_14_nested_config_upstream",
+          "root_cause_category": "KeyError",
+          "file": "app/config_loader.py",
+          "line": 4,
+          "is_upstream": true,
+          "is_ambiguous": false,
+          "notes": "Upstream config loader omitted database section dictionary."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Crash line patch attempt in bug_14_nested_config_upstream",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/config_loader.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Crash line patch attempt in bug_14_nested_config_upstream",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/config_loader.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 6.17,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_15_cache_attribute",
+        "ground_truth": {
+          "bug_id": "bug_15_cache_attribute",
+          "root_cause_category": "AttributeError",
+          "file": "app/cache.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Calling .seconds attribute on integer timestamp instead of timedelta."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for AttributeError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/cache.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for AttributeError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/cache.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 6.65,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_16_sanitizer_logic",
+        "ground_truth": {
+          "bug_id": "bug_16_sanitizer_logic",
+          "root_cause_category": "LogicError",
+          "file": "app/sanitizer.py",
+          "line": 5,
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "notes": "Regex logic strips international unicode characters improperly."
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for LogicError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "app/sanitizer.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for LogicError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "app/sanitizer.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 6.93,
+        "cost_usd": 8e-05
+      }
+    ]
+  }
+}

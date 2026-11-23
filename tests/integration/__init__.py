@@ -1,0 +1,1 @@
+"""BugScope integration tests."""

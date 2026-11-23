@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_07_upstream_discount",
+  "root_cause_category": "KeyError",
+  "file": "app/parser.py",
+  "line": 5,
+  "is_upstream": true,
+  "is_ambiguous": false,
+  "notes": "Upstream parser failed to set default 'discount' key before passing to calculator."
+}

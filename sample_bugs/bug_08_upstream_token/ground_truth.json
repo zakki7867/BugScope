@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_08_upstream_token",
+  "root_cause_category": "AttributeError",
+  "file": "app/auth.py",
+  "line": 4,
+  "is_upstream": true,
+  "is_ambiguous": false,
+  "notes": "Upstream auth returns raw tuple instead of User object with .role attribute."
+}

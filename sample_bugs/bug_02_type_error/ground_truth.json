@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_02_type_error",
+  "root_cause_category": "TypeError",
+  "file": "app/pricing.py",
+  "line": 4,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Subtracting string rate from integer 1.0 causes TypeError."
+}

@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_04_attribute_error",
+  "root_cause_category": "AttributeError",
+  "file": "app/session.py",
+  "line": 6,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Calling .lower() on None session token."
+}

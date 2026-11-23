@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_14_nested_config_upstream",
+  "root_cause_category": "KeyError",
+  "file": "app/config_loader.py",
+  "line": 4,
+  "is_upstream": true,
+  "is_ambiguous": false,
+  "notes": "Upstream config loader omitted database section dictionary."
+}

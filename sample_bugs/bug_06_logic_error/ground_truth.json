@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_06_logic_error",
+  "root_cause_category": "LogicError",
+  "file": "app/tax.py",
+  "line": 4,
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "notes": "Tax bracket calculates rate as integer percentage without dividing by 100."
+}
