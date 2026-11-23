@@ -76,3 +76,28 @@ BugScope introduces **evidence-checked debugging**:
 - **Interview explanation**:
   > *"Rather than dumping an entire codebase into an LLM prompt (which introduces noise, hallucinations, and high costs), the repo investigator deterministically navigates AST nodes to extract the target function, its callers, its callees, and its unit tests within a strict token budget."*
 
+---
+
+## 4. Milestone 3 Architecture
+
+### `app/services/sandbox.py` — Container Isolation Engine
+- **What it does**: Spawns isolated Docker containers to run tests without exposing the host system.
+- **Constraints enforced**:
+  - `network_mode="none"`: Complete network isolation prevents data exfiltration and dependency spoofing.
+  - `mem_limit="512m"` and `nano_cpus=1.0`: Strict CPU/memory caps guard against denial-of-service and runaway loops.
+  - Read-only project volume (`:ro`): Guarantees the original project files can never be corrupted.
+  - Ephemeral scratch directory (`/scratch:rw`): Where temporary execution and diff patching safely take place.
+  - Strict 30-second execution timeout.
+  - **Docker-Unavailable Fallback**: If Docker is not running, BugScope **refuses** to execute code directly on the host. Instead, it marks `docker_available=False`, documents the limitation, and proceeds in analysis-only mode.
+- **Interview explanation**:
+  > *"Running untrusted user code on the host is a major risk. BugScope enforces hardware and network constraints using disposable Docker containers. If the sandbox is unavailable, we refuse code execution entirely and report the exact limitation."*
+
+### `app/workflow/nodes/reproducer.py` — Pre-Patch Baseline Verification
+- **What it does**: Runs the failing test in the sandbox *before* touching any code.
+- **Why it matters**:
+  - Confirms the failure actually reproduces under isolated conditions.
+  - If the test passes or Docker is absent, the investigation continues with `trust_level="low"`, ensuring total honesty about the baseline state.
+- **Interview explanation**:
+  > *"You cannot prove a bug was fixed unless you first prove it failed. The reproducer establishes the baseline ground truth before any hypotheses or patches are considered."*
+
+

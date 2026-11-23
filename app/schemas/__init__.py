@@ -2,6 +2,7 @@
 
 from app.schemas.failure import FailureCategory, CallFrame, FailureReport
 from app.schemas.context import Snippet, ContextBundle
+from app.schemas.reproduction import ReproductionResult
 
 __all__ = [
     "FailureCategory",
@@ -9,4 +10,5 @@ __all__ = [
     "FailureReport",
     "Snippet",
     "ContextBundle",
+    "ReproductionResult",
 ]
