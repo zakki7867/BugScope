@@ -3,6 +3,12 @@
 from app.schemas.failure import FailureCategory, CallFrame, FailureReport
 from app.schemas.context import Snippet, ContextBundle
 from app.schemas.reproduction import ReproductionResult
+from app.schemas.hypothesis import (
+    EvidenceItem,
+    Hypothesis,
+    RankedHypothesis,
+    HypothesesResponse,
+)
 
 __all__ = [
     "FailureCategory",
@@ -11,4 +17,8 @@ __all__ = [
     "Snippet",
     "ContextBundle",
     "ReproductionResult",
+    "EvidenceItem",
+    "Hypothesis",
+    "RankedHypothesis",
+    "HypothesesResponse",
 ]

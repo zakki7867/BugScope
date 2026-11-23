@@ -100,4 +100,37 @@ BugScope introduces **evidence-checked debugging**:
 - **Interview explanation**:
   > *"You cannot prove a bug was fixed unless you first prove it failed. The reproducer establishes the baseline ground truth before any hypotheses or patches are considered."*
 
+---
+
+## 5. Milestone 4 Architecture
+
+### `app/services/llm_client.py` — Resilient Structured LLM Client
+- **What it does**: Thin HTTP client wrapper providing schema-enforced JSON generation.
+- **Key design choice**: Enforces Pydantic v2 schemas directly on LLM responses. If the LLM generates malformed JSON or violates field bounds, the client catches the `ValidationError` and retries once with automated schema repair feedback.
+- **Cost Observability**: Calculates real-time dollar cost based on token counts for every LLM interaction.
+- **Interview explanation**:
+  > *"Rather than relying on unbounded conversational LLM outputs, BugScope treats the LLM as a structured function that returns validated Pydantic models. Our 1-retry fallback catches validation errors automatically without crashing the pipeline."*
+
+### `app/workflow/nodes/hypothesis_generator.py` — Grounded Hypothesis Synthesis
+- **What it does**: Generates exactly 3 root-cause hypotheses backed by quoted code evidence.
+- **Key Constraints**:
+  - **Prompt Isolation**: Wraps all user-supplied traces and repository code in `<untrusted_trace>` and `<untrusted_code_context>` delimiters, preventing prompt injection attacks from adversarial repo contents.
+  - **Upstream Mandate**: Forces at least one hypothesis to analyze causes upstream of the crash line (e.g. invalid arguments passed by callers).
+- **Interview explanation**:
+  > *"LLMs have a strong recency bias toward fixing only the exact line of the crash (e.g. adding `if key in dict:`). By mandating that at least one hypothesis investigates upstream callers, BugScope identifies architectural bugs where the caller passed corrupted data."*
+
+### `app/workflow/nodes/evidence_verifier.py` — Mechanical Anti-Hallucination Filter
+- **What it does**: Mechanically verifies whether quotes cited in hypotheses actually exist on disk at the stated line numbers.
+- **How it works**:
+  1. Resolves file on disk and extracts lines between `line_start` and `line_end`.
+  2. Normalizes whitespace across both quote and disk slice.
+  3. Discards any unverified or hallucinated evidence items.
+  4. Calculates deterministic score: `verified_supports - verified_contradicts`.
+  5. Ranks hypotheses strictly by verified score.
+  6. If a hypothesis has 0 verified supporting evidence, it is labeled `'unsupported'`.
+  7. **No percentages**: Avoids fake confidence percentages in favor of honest integer evidence counts.
+- **Interview explanation**:
+  > *"The core differentiator of BugScope is mechanical evidence verification. If an LLM invents code to justify its theory, that quote is checked against disk and immediately thrown out. An LLM cannot bluff its way to the top of our ranking."*
+
+
 
