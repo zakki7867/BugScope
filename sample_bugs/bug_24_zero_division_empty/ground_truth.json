@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_24_zero_division_empty",
+  "root_cause_category": "ZeroDivisionError",
+  "file": "average.py",
+  "line": 3,
+  "notes": "Empty list divides by zero.",
+  "is_upstream": false,
+  "is_ambiguous": false
+}

@@ -15,6 +15,8 @@ class EvidenceItem(BaseModel):
     )
     reason: str = Field(..., description="One-sentence explanation of relevance")
     verified: bool = Field(default=False, description="True if quote was mechanically verified on disk")
+    range_corrected: bool = Field(default=False, description="True if line range was adjusted within tolerance to match on-disk quote")
+    verification_note: Optional[str] = Field(default=None, description="Detailed mechanical verification result")
 
 
 class Hypothesis(BaseModel):

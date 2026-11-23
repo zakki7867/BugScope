@@ -195,20 +195,21 @@ BugScope introduces **evidence-checked debugging**:
 
 ## 8. Benchmark Suite & Evaluation Harness
 
-### `sample_bugs/` — 20-Project Benchmark Suite
-- **What it does**: A comprehensive benchmark of 20 self-contained Python projects, each containing application code, a pytest test suite, and a ground-truth specification (`ground_truth.json`).
+### `sample_bugs/` — 24-Project Benchmark Suite
+- **What it does**: A comprehensive benchmark of 24 self-contained Python projects, each containing application code, a pytest test suite, and a ground-truth specification (`ground_truth.json`).
 - **Dataset Composition**:
-  - 7 Exception Categories: `KeyError`, `TypeError`, `IndexError`, `AttributeError`, `ImportError`, `ValueError`, `AssertionError`, `LogicError`.
-  - **4 Upstream Bugs**: (e.g. `bug_07_upstream_discount`, `bug_08_upstream_token`, `bug_09_upstream_order`, `bug_14_nested_config_upstream`, `bug_18_pydantic_validation_upstream`) where failures originate upstream of the crash line.
-  - **2 Ambiguous Bugs**: (`bug_10_ambiguous_rounding`, `bug_11_ambiguous_tags`) exercising honest human-in-the-loop decision routing.
-  - Concurrency & Lazy Imports: (`bug_17_concurrency_race`, `bug_20_circular_import_lazy`).
+  - Exception & Bug Categories: `KeyError`, `TypeError`, `IndexError`, `AttributeError`, `ImportError`, `ValueError`, `AssertionError`, `LogicError`, `mutable_default`, `environment_dependent`, `ambiguous_intent`, and `ZeroDivisionError`.
+  - **5 Upstream Bugs**: (e.g. `bug_07_upstream_discount`, `bug_08_upstream_token`, `bug_09_upstream_order`, `bug_14_nested_config_upstream`, `bug_18_pydantic_validation_upstream`) where failures originate upstream of the crash line.
+  - **3 Ambiguous-Intent Bugs**: (`bug_10_ambiguous_rounding`, `bug_11_ambiguous_tags`, `bug_23_ambiguous_docstring_percent`) exercising honest human-in-the-loop decision routing (`needs_human_decision`).
+  - **1 Sandbox-Limited Failure**: (`bug_22_env_dependent_locale`) exercising honest handling when a failure cannot be reproduced without external environment state (`could_not_reproduce`).
+  - Concurrency, Mutable Defaults & Lazy Imports: (`bug_17_concurrency_race`, `bug_20_circular_import_lazy`, `bug_21_mutable_default_ledger`).
 
 ### `evaluation/run.py` & `evaluation/metrics.py` — Benchmark Results
-- **Empirical Findings (20 Bug Projects)**:
-  - **BugScope Top-1 Accuracy**: **100.0%** vs. Baseline 75.0% (Single-prompt baseline fails on upstream bugs by only inspecting crash line).
-  - **Evidence Verified Rate**: **100.0%** mechanical quote checks on disk.
+- **Empirical Findings (24 Bug Projects)**:
+  - **BugScope Top-1 Accuracy**: **100.0%** vs. Baseline 79.2% (Single-prompt baseline fails on upstream bugs and subtle mutations).
+  - **Evidence Verified Rate**: **100.0%** mechanical quote checks on disk (with syntax normalization and $\pm 2$ lines tolerance).
   - **Regression Test Execution Rate**: **100.0%** vs. Baseline 0.0%.
-  - **Fix Validation Rate (3-Phase Pass)**: **90.0%** (18 validated, 2 honestly flagged as `needs_human_decision`).
+  - **Fix Validation Rate (3-Phase Pass)**: **83.3%** (20 validated, 3 honestly flagged as `needs_human_decision`, 1 flagged as `could_not_reproduce`).
   - **Average Cost per Bug**: $0.00012.
 
 ---

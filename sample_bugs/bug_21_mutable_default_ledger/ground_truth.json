@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_21_mutable_default_ledger",
+  "root_cause_category": "mutable_default",
+  "file": "ledger.py",
+  "line": 1,
+  "notes": "The default list is shared across calls; the assertion fails far from the cause.",
+  "is_upstream": true,
+  "is_ambiguous": false
+}

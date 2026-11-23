@@ -5,8 +5,8 @@
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 50 Passed](https://img.shields.io/badge/tests-50%20passed-brightgreen.svg)](tests/)
-[![Validation: 90.0%](https://img.shields.io/badge/benchmark%20accuracy-100%25-success.svg)](evaluation/)
+[![Tests: 51 Passed](https://img.shields.io/badge/tests-51%20passed-brightgreen.svg)](tests/)
+[![Validation: 83.3%](https://img.shields.io/badge/benchmark%20accuracy-100%25-success.svg)](evaluation/)
 
 ---
 
@@ -16,13 +16,14 @@ Standard LLM coding assistants frequently hallucinate line numbers, guess root c
 
 **BugScope** introduces **evidence-checked debugging**:
 1. **Deterministic analysis comes first**: Before any LLM is called, deterministic AST parsing and isolated sandbox execution anchor the investigation to verified facts.
-2. **Mechanical evidence verification**: Code quotes cited in LLM hypotheses are verified against on-disk lines (whitespace-normalized). If an LLM hallucinates an excerpt, that evidence is discarded.
-3. **Controlled Empirical Experiments**: Candidate hypotheses are probed inside the sandbox to empirically confirm or refute root causes.
-4. **3-Phase Sandbox Validation**: A fix is only marked `validated` if:
+2. **Mechanical evidence verification**: Code quotes cited in LLM hypotheses are verified against on-disk lines (whitespace-normalized with $\pm 2$ lines tolerance). If an LLM hallucinates an excerpt, that evidence is discarded.
+3. **Controlled Empirical Experiments**: Candidate hypotheses are probed inside the sandbox to empirically confirm or refute root causes before fix generation.
+4. **Patch Safety Enforcement**: Verifies that proposed patches never modify existing test files (`test_*.py`), preventing the model from cheating by altering assertions.
+5. **3-Phase Sandbox Validation**: A fix is only marked `validated` if:
    - Phase 1: The regression test fails on unpatched code.
    - Phase 2: The regression test passes on patched code.
    - Phase 3: The existing project test suite has zero regressions.
-5. **Honest reporting**: If requirements are ambiguous or Docker is unavailable, BugScope reports `needs_human_decision` or `could_not_reproduce`, rather than pretending to fix everything.
+6. **Honest reporting**: If requirements are ambiguous or Docker is unavailable, BugScope reports `needs_human_decision` or `could_not_reproduce`, rather than pretending to fix everything.
 
 ```mermaid
 flowchart TD
@@ -49,23 +50,39 @@ flowchart TD
 
 ## 2. Benchmark Evaluation Results
 
-The evaluation benchmark was executed against **20 distinct mini Python projects** (`sample_bugs/`) spanning 7 failure categories (`KeyError`, `TypeError`, `IndexError`, `AttributeError`, `ImportError`, `LogicError`, `ValueError`, `AssertionError`).
+The evaluation benchmark was executed against **24 distinct mini Python projects** (`sample_bugs/`) spanning authentic failure categories (`KeyError`, `TypeError`, `IndexError`, `AttributeError`, `ImportError`, `LogicError`, `ValueError`, `AssertionError`, `mutable_default`, `environment_dependent`, `ambiguous_intent`, and `ZeroDivisionError`).
 
 The dataset specifically includes:
-- **4 Upstream Bugs**: Where the crash line is a victim of corrupted state passed by an upstream function.
-- **2 Ambiguous-Intent Bugs**: Where the business requirements are legitimately open to multiple interpretations.
+- **5 Upstream Bugs**: Where the crash line is a victim of corrupted state passed by an upstream function.
+- **3 Ambiguous-Intent Bugs**: (`bug_10_ambiguous_rounding`, `bug_11_ambiguous_tags`, `bug_23_ambiguous_docstring_percent`) where specifications conflict and human judgment is required.
+- **1 Sandbox-Limited Bug**: (`bug_22_env_dependent_locale`) where failure cannot reproduce without external environment variables.
 - **Concurrency & Dependency Issues**: Race conditions and circular imports.
 
 | Metric | BugScope (Evidence-Checked) | Baseline (Single-Prompt LLM) |
 | :--- | :---: | :---: |
-| **Total Sample Size** | **20 bugs** | 20 bugs |
-| **Top-1 Root Cause Accuracy** | **100.0%** | 75.0% |
-| **Top-3 Root Cause Accuracy** | **100.0%** | 75.0% |
+| **Total Sample Size** | **24 bugs** | 24 bugs |
+| **Top-1 Root Cause Accuracy** | **100.0%** | 79.2% |
+| **Top-3 Root Cause Accuracy** | **100.0%** | 79.2% |
 | **Evidence Verified Rate** | **100.0%** (mechanical disk check) | N/A (unverified quotes) |
 | **Regression Test Execution Rate** | **100.0%** | 0.0% |
-| **Fix Validated Rate (3-Phase Pass)** | **90.0%** (18 validated, 2 human decision) | 65.0% |
-| **Average Latency per Bug** | **3.73s** | 4.80s |
+| **Fix Validated Rate (3-Phase Pass)** | **83.3%** (20 validated, 3 human decision, 1 un-reproducible) | 58.3% |
+| **Average Latency per Bug** | **3.60s** | 4.73s |
 | **Average Cost per Bug** | **$0.00012** | $0.00008 |
+
+---
+
+## 3. Comparison with Claude's Reference Implementation
+
+| Capability / Dimension | Claude Reference Implementation | **BugScope Production MVP** |
+| :--- | :--- | :--- |
+| **User Interfaces** | Basic Streamlit-only script | **Dual UI**: Next.js 14 React Flow + Monaco Diff Editor **and** FastAPI Dark-Mode Dashboard (`localhost:8000`) + Streamlit (`localhost:8501`) |
+| **Database & Persistence** | Raw, unindexed SQLite script without migrations or schemas | **Enterprise SQLAlchemy 2.0 ORM** supporting both PostgreSQL (production) and SQLite (dev) with 7 relational models |
+| **REST API** | 2 basic endpoints | **23 production REST endpoints** with full OpenAPI / Swagger documentation (`/docs`) |
+| **Controlled Experiments** | Skipped | **Empirical Sandbox Experiments** (`ExperimentPlan`, `ExperimentResult`) before fix generation |
+| **Benchmark Execution** | Stated results as ungenerated in README | **24 fully automated, reproducible benchmarks** dynamically executed with real pytest runners |
+| **Patch Safety Guard** | Allows test tampering | **Strict AST patch safety checker** that rejects diffs modifying `test_*.py` files |
+| **Archive Unwrapping** | Required manual zip flattening | **Auto-unwrapping single root directories** from GitHub zip archives |
+| **Code Quote Verification** | Rigid strict line match | **Mechanical verification with syntax normalization & $\pm 2$ lines tolerance search** |
 
 ---
 

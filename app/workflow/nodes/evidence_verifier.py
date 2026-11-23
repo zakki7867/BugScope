@@ -5,32 +5,39 @@ on disk at the stated files and line numbers.
 
 Rules:
 1. Normalize whitespace when comparing quotes to on-disk code.
-2. Mark verified quotes as verified=True; discard unverified/hallucinated items.
-3. Score each hypothesis: count(verified supports) - count(verified contradicts).
-4. Rank hypotheses descending by score.
-5. If verified supports == 0, label as 'unsupported'.
-6. Do NOT output percentages.
+2. If quote matches exactly at stated lines: mark verified=True.
+3. If quote matches within +-2 lines tolerance: accept and adjust range (range_corrected=True).
+4. Discard unverified or hallucinated items.
+5. Score each hypothesis: count(verified supports) - count(verified contradicts).
+6. Rank hypotheses descending by score; if verified supports == 0, label as 'unsupported'.
 No LLM calls are made in this node.
 """
 
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from app.schemas.hypothesis import EvidenceItem, Hypothesis, RankedHypothesis
+
+LINE_TOLERANCE = 2
+MIN_QUOTE_CHARS = 4
 
 
 def _normalize_whitespace(text: str) -> str:
     """Normalize whitespace and strip whitespace around code syntax operators."""
-    # 1. Collapse multiple spaces into one
     s = re.sub(r"\s+", " ", text).strip()
-    # 2. Strip whitespace around syntax delimiters and operators
     s = re.sub(r"\s*([()\[\]{},:=+\-*/<>!&|])\s*", r"\1", s)
     return s
 
 
-def verify_quote_on_disk(repo_path: Path, item: EvidenceItem) -> bool:
-    """Mechanically verify whether item.quote appears at item.file between line_start and line_end."""
+def verify_quote_details(
+    repo_path: Path, item: EvidenceItem
+) -> Tuple[bool, int, int, bool, Optional[str]]:
+    """Mechanically verify whether item.quote appears at item.file.
+
+    Returns:
+        (is_verified, actual_line_start, actual_line_end, range_corrected, note)
+    """
     clean_file = item.file.replace("\\", "/").strip().lstrip("/")
     target_file = (repo_path / clean_file).resolve()
 
@@ -39,47 +46,77 @@ def verify_quote_on_disk(repo_path: Path, item: EvidenceItem) -> bool:
         candidates = list(repo_path.rglob(Path(clean_file).name))
         if candidates:
             target_file = candidates[0]
+            clean_file = str(target_file.relative_to(repo_path)).replace("\\", "/")
         else:
-            return False
+            return False, item.line_start, item.line_end, False, f"File '{clean_file}' not found."
+
+    norm_quote = _normalize_whitespace(item.quote)
+    if len(norm_quote) < MIN_QUOTE_CHARS:
+        return False, item.line_start, item.line_end, False, "Quote too short to verify."
 
     try:
         content = target_file.read_text(encoding="utf-8", errors="replace")
         lines = content.splitlines()
-    except Exception:
-        return False
+    except Exception as exc:
+        return False, item.line_start, item.line_end, False, f"Read error: {exc}"
 
-    # Guard line boundaries (1-indexed)
-    if item.line_start < 1 or item.line_end < item.line_start or item.line_start > len(lines):
-        return False
+    if not lines:
+        return False, item.line_start, item.line_end, False, "File is empty."
 
-    # Extract target slice with small margin (+-1 line) to tolerate minor boundary offsets
-    slice_start = max(1, item.line_start - 1)
-    slice_end = min(len(lines), item.line_end + 1)
-    actual_excerpt = "\n".join(lines[slice_start - 1 : slice_end])
+    # Guard against invalid or wildly out-of-range line claims
+    if item.line_start > len(lines) + LINE_TOLERANCE or item.line_end < 1 - LINE_TOLERANCE:
+        return False, item.line_start, item.line_end, False, "Stated line range is outside file bounds."
 
+    start = max(1, min(len(lines), item.line_start))
+    end = max(start, min(len(lines), item.line_end))
+
+    # 1. Check exact stated slice
+    actual_excerpt = "\n".join(lines[start - 1 : end])
     norm_excerpt = _normalize_whitespace(actual_excerpt)
-    norm_quote = _normalize_whitespace(item.quote)
+    if norm_quote in norm_excerpt:
+        return True, start, end, False, "Exact line match verified."
 
-    if not norm_quote:
-        return False
+    # 2. Tolerance window search (+- LINE_TOLERANCE lines)
+    lo = max(1, item.line_start - LINE_TOLERANCE)
+    hi = min(len(lines), item.line_end + LINE_TOLERANCE)
+    best_range = None
 
-    # Check for containment
-    return norm_quote in norm_excerpt or norm_excerpt in norm_quote
+    if lo <= hi:
+        for a in range(lo, hi + 1):
+            for b in range(a, hi + 1):
+                window_text = "\n".join(lines[a - 1 : b])
+                norm_window = _normalize_whitespace(window_text)
+                if norm_quote in norm_window:
+                    if best_range is None or (b - a) < (best_range[1] - best_range[0]):
+                        best_range = (a, b)
+                    break
+
+    if best_range:
+        return (
+            True,
+            best_range[0],
+            best_range[1],
+            True,
+            f"Quote located within +-2 lines tolerance at lines {best_range[0]}-{best_range[1]}.",
+        )
+
+    return False, item.line_start, item.line_end, False, "Quote not found on disk at stated lines."
+
+
+def verify_quote_on_disk(repo_path: Path, item: EvidenceItem) -> bool:
+    """Check if an evidence quote is verified on disk at the stated location.
+
+    Returns boolean True if verified (with or without line tolerance), False otherwise.
+    """
+    is_valid, _, _, _, _ = verify_quote_details(repo_path, item)
+    return is_valid
 
 
 def evidence_verifier(
     repo_dir: str,
     hypotheses: List[Hypothesis],
 ) -> List[RankedHypothesis]:
-    """Verify evidence items mechanically on disk and rank hypotheses by verified score.
-
-    Args:
-        repo_dir: Absolute path of project repository.
-        hypotheses: List of candidate hypotheses from hypothesis_generator.
-
-    Returns:
-        List of RankedHypothesis sorted descending by score.
-    """
+    """Verify evidence items mechanically on disk and rank hypotheses by verified score."""
     repo_path = Path(repo_dir).resolve()
     ranked_list: List[RankedHypothesis] = []
 
@@ -88,9 +125,19 @@ def evidence_verifier(
         discarded_count = 0
 
         for item in hyp.evidence:
-            is_valid = verify_quote_on_disk(repo_path, item)
+            is_valid, actual_start, actual_end, corrected, note = verify_quote_details(
+                repo_path, item
+            )
             if is_valid:
-                verified_item = item.model_copy(update={"verified": True})
+                verified_item = item.model_copy(
+                    update={
+                        "verified": True,
+                        "line_start": actual_start,
+                        "line_end": actual_end,
+                        "range_corrected": corrected,
+                        "verification_note": note,
+                    }
+                )
                 verified_items.append(verified_item)
             else:
                 discarded_count += 1
@@ -106,7 +153,7 @@ def evidence_verifier(
             id=hyp.id,
             title=hyp.title,
             explanation=hyp.explanation,
-            evidence=verified_items,  # Discarded hallucinated items are removed
+            evidence=verified_items,
             score=score,
             label=label,
             is_upstream=hyp.is_upstream,
@@ -119,7 +166,6 @@ def evidence_verifier(
     # Sort descending by score, tie-breaking by verified_support_count
     ranked_list.sort(key=lambda h: (h.score, h.verified_support_count), reverse=True)
 
-    # Assign rank numbers 1, 2, ...
     for idx, rh in enumerate(ranked_list, start=1):
         rh.rank = idx
 

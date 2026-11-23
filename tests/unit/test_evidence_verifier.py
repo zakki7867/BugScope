@@ -169,3 +169,25 @@ def test_evidence_verifier_ranking_and_discarding(repo_with_code):
     assert ranked[2].score == 0
     assert ranked[2].label == "unsupported"
     assert ranked[2].discarded_evidence_count == 1
+
+
+def test_verify_quote_line_tolerance_correction(repo_with_code):
+    """Test verification succeeds within +-2 lines tolerance and reports correction."""
+    from app.workflow.nodes.evidence_verifier import verify_quote_details
+
+    # Line 3 is: raise ValueError("Empty items")
+    # LLM cited line_start=2, line_end=2 (off by 1 line)
+    item = EvidenceItem(
+        file="app/orders.py",
+        line_start=2,
+        line_end=2,
+        quote='raise ValueError("Empty items")',
+        stance="supports",
+        reason="Checks for empty items",
+    )
+    is_valid, start, end, corrected, note = verify_quote_details(repo_with_code, item)
+    assert is_valid is True
+    assert corrected is True
+    assert start == 3
+    assert end == 3
+    assert "tolerance" in note.lower()

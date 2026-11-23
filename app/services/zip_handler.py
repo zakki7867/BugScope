@@ -167,12 +167,20 @@ def extract_zip_safely(zip_data: bytes, target_dir: str) -> List[str]:
 def create_temp_repo_from_zip(zip_data: bytes) -> str:
     """Extract ZIP bytes into a new isolated temporary directory.
 
+    If the archive contains a single top-level directory (e.g. repo-main/),
+    resolves and returns that inner root.
+
     Returns:
-        Absolute path to the newly created temporary directory.
+        Absolute path to the repository directory.
     """
     temp_dir = tempfile.mkdtemp(prefix="bugscope_repo_")
     try:
         extract_zip_safely(zip_data, temp_dir)
+        p = Path(temp_dir)
+        entries = [e for e in p.iterdir() if e.is_dir()]
+        files = [e for e in p.iterdir() if e.is_file()]
+        if len(entries) == 1 and not files:
+            return str(entries[0])
         return temp_dir
     except Exception:
         # Clean up directory if extraction fails

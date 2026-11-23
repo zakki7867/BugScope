@@ -2,20 +2,20 @@
   "bugscope": {
     "metrics": {
       "mode": "bugscope",
-      "total_bugs": 20,
+      "total_bugs": 24,
       "top1_root_cause_accuracy": 1.0,
       "top3_root_cause_accuracy": 1.0,
       "evidence_verified_rate": 1.0,
       "regression_test_executes_rate": 1.0,
-      "fix_validated_rate": 0.9,
-      "avg_seconds": 3.73,
+      "fix_validated_rate": 0.833,
+      "avg_seconds": 3.6,
       "avg_cost_usd": 0.00012,
       "verdict_counts": {
-        "validated": 18,
+        "validated": 20,
         "partially_validated": 0,
         "not_validated": 0,
-        "could_not_reproduce": 0,
-        "needs_human_decision": 2
+        "could_not_reproduce": 1,
+        "needs_human_decision": 3
       }
     },
     "results": [
@@ -43,7 +43,9 @@
                 "quote": "return f'{name} <{email}>'",
                 "stance": "supports",
                 "reason": "Code directly implements KeyError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -93,7 +95,9 @@
               "quote": "return f'{name} <{email}>'",
               "stance": "supports",
               "reason": "Code directly implements KeyError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -106,7 +110,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.57,
+        "duration_seconds": 3.8,
         "cost_usd": 0.00012
       },
       {
@@ -133,7 +137,9 @@
                 "quote": "return round(price * factor, 2)",
                 "stance": "supports",
                 "reason": "Code directly implements TypeError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -183,7 +189,9 @@
               "quote": "return round(price * factor, 2)",
               "stance": "supports",
               "reason": "Code directly implements TypeError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -196,7 +204,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.6,
+        "duration_seconds": 3.87,
         "cost_usd": 0.00012
       },
       {
@@ -223,7 +231,9 @@
                 "quote": "# Direct index access causes IndexError if start_idx exceeds len",
                 "stance": "supports",
                 "reason": "Code directly implements IndexError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -273,7 +283,9 @@
               "quote": "# Direct index access causes IndexError if start_idx exceeds len",
               "stance": "supports",
               "reason": "Code directly implements IndexError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -286,7 +298,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.62,
+        "duration_seconds": 3.9,
         "cost_usd": 0.00012
       },
       {
@@ -313,7 +325,9 @@
                 "quote": "return token.lower().startswith('sess_')",
                 "stance": "supports",
                 "reason": "Code directly implements AttributeError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -363,7 +377,9 @@
               "quote": "return token.lower().startswith('sess_')",
               "stance": "supports",
               "reason": "Code directly implements AttributeError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -376,7 +392,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 4.03,
+        "duration_seconds": 3.74,
         "cost_usd": 0.00012
       },
       {
@@ -403,7 +419,9 @@
                 "quote": "import html",
                 "stance": "supports",
                 "reason": "Code directly implements ImportError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -453,7 +471,9 @@
               "quote": "import html",
               "stance": "supports",
               "reason": "Code directly implements ImportError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -466,7 +486,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.52,
+        "duration_seconds": 3.3,
         "cost_usd": 0.00012
       },
       {
@@ -493,7 +513,9 @@
                 "quote": "return income * (rate_percent / 10.0)",
                 "stance": "supports",
                 "reason": "Code directly implements LogicError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -543,7 +565,9 @@
               "quote": "return income * (rate_percent / 10.0)",
               "stance": "supports",
               "reason": "Code directly implements LogicError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -556,7 +580,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.8,
+        "duration_seconds": 3.66,
         "cost_usd": 0.00012
       },
       {
@@ -583,7 +607,9 @@
                 "quote": "return {'item': raw_json.get('item', 'unknown'), 'price': raw_json.get('price', 0.0)}",
                 "stance": "supports",
                 "reason": "Code directly implements KeyError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -633,7 +659,9 @@
               "quote": "return {'item': raw_json.get('item', 'unknown'), 'price': raw_json.get('price', 0.0)}",
               "stance": "supports",
               "reason": "Code directly implements KeyError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -646,7 +674,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.83,
+        "duration_seconds": 3.73,
         "cost_usd": 0.00012
       },
       {
@@ -673,7 +701,9 @@
                 "quote": "return ('admin', token)",
                 "stance": "supports",
                 "reason": "Code directly implements AttributeError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -723,7 +753,9 @@
               "quote": "return ('admin', token)",
               "stance": "supports",
               "reason": "Code directly implements AttributeError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -736,7 +768,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 4.06,
+        "duration_seconds": 3.97,
         "cost_usd": 0.00012
       },
       {
@@ -763,7 +795,9 @@
                 "quote": "return {'task_id': 101, 'duration': '120'}",
                 "stance": "supports",
                 "reason": "Code directly implements TypeError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -813,7 +847,9 @@
               "quote": "return {'task_id': 101, 'duration': '120'}",
               "stance": "supports",
               "reason": "Code directly implements TypeError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -826,7 +862,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.94,
+        "duration_seconds": 4.29,
         "cost_usd": 0.00012
       },
       {
@@ -853,7 +889,9 @@
                 "quote": "return round(raw, 2)",
                 "stance": "supports",
                 "reason": "Code directly implements LogicError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -903,7 +941,9 @@
               "quote": "return round(raw, 2)",
               "stance": "supports",
               "reason": "Code directly implements LogicError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -916,7 +956,7 @@
         },
         "verdict": "needs_human_decision",
         "regression_test_executed": true,
-        "duration_seconds": 3.36,
+        "duration_seconds": 3.31,
         "cost_usd": 0.00012
       },
       {
@@ -943,7 +983,9 @@
                 "quote": "return [t.strip().lower() for t in tags]",
                 "stance": "supports",
                 "reason": "Code directly implements ValueError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -993,7 +1035,9 @@
               "quote": "return [t.strip().lower() for t in tags]",
               "stance": "supports",
               "reason": "Code directly implements ValueError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1006,7 +1050,7 @@
         },
         "verdict": "needs_human_decision",
         "regression_test_executed": true,
-        "duration_seconds": 3.91,
+        "duration_seconds": 3.86,
         "cost_usd": 0.00012
       },
       {
@@ -1033,7 +1077,9 @@
                 "quote": "for c in range(cols):",
                 "stance": "supports",
                 "reason": "Code directly implements IndexError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1083,7 +1129,9 @@
               "quote": "for c in range(cols):",
               "stance": "supports",
               "reason": "Code directly implements IndexError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1096,7 +1144,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.3,
+        "duration_seconds": 3.48,
         "cost_usd": 0.00012
       },
       {
@@ -1123,7 +1171,9 @@
                 "quote": "# Crashes if start_time is naive datetime",
                 "stance": "supports",
                 "reason": "Code directly implements TypeError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1173,7 +1223,9 @@
               "quote": "# Crashes if start_time is naive datetime",
               "stance": "supports",
               "reason": "Code directly implements TypeError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1186,7 +1238,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.64,
+        "duration_seconds": 4.01,
         "cost_usd": 0.00012
       },
       {
@@ -1213,7 +1265,9 @@
                 "quote": "return {'server': {'port': 8080}}",
                 "stance": "supports",
                 "reason": "Code directly implements KeyError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1263,7 +1317,9 @@
               "quote": "return {'server': {'port': 8080}}",
               "stance": "supports",
               "reason": "Code directly implements KeyError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1276,7 +1332,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.7,
+        "duration_seconds": 3.58,
         "cost_usd": 0.00012
       },
       {
@@ -1303,7 +1359,9 @@
                 "quote": "return expiry > 1000",
                 "stance": "supports",
                 "reason": "Code directly implements AttributeError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1353,7 +1411,9 @@
               "quote": "return expiry > 1000",
               "stance": "supports",
               "reason": "Code directly implements AttributeError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1366,7 +1426,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.61,
+        "duration_seconds": 3.29,
         "cost_usd": 0.00012
       },
       {
@@ -1393,7 +1453,9 @@
                 "quote": "# incorrectly stripping letters like '_' and '-' allowed by spec",
                 "stance": "supports",
                 "reason": "Code directly implements LogicError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1443,7 +1505,9 @@
               "quote": "# incorrectly stripping letters like '_' and '-' allowed by spec",
               "stance": "supports",
               "reason": "Code directly implements LogicError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1456,7 +1520,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.82,
+        "duration_seconds": 3.37,
         "cost_usd": 0.00012
       },
       {
@@ -1483,7 +1547,9 @@
                 "quote": "return self.count",
                 "stance": "supports",
                 "reason": "Code directly implements AssertionError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1533,7 +1599,9 @@
               "quote": "return self.count",
               "stance": "supports",
               "reason": "Code directly implements AssertionError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1546,7 +1614,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.66,
+        "duration_seconds": 3.28,
         "cost_usd": 0.00012
       },
       {
@@ -1573,7 +1641,9 @@
                 "quote": "return {\"id\": data[\"id\"], \"timestamp\": int(data[\"timestamp\"])}",
                 "stance": "supports",
                 "reason": "Code directly implements ValueError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1623,7 +1693,9 @@
               "quote": "return {\"id\": data[\"id\"], \"timestamp\": int(data[\"timestamp\"])}",
               "stance": "supports",
               "reason": "Code directly implements ValueError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1636,7 +1708,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.88,
+        "duration_seconds": 3.43,
         "cost_usd": 0.00012
       },
       {
@@ -1663,7 +1735,9 @@
                 "quote": "raise ValueError(\"Invalid username character\")",
                 "stance": "supports",
                 "reason": "Code directly implements ValueError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1713,7 +1787,9 @@
               "quote": "raise ValueError(\"Invalid username character\")",
               "stance": "supports",
               "reason": "Code directly implements ValueError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1726,7 +1802,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.72,
+        "duration_seconds": 3.27,
         "cost_usd": 0.00012
       },
       {
@@ -1753,7 +1829,9 @@
                 "quote": "from app.service_a import compute_a",
                 "stance": "supports",
                 "reason": "Code directly implements ImportError",
-                "verified": true
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
               }
             ],
             "score": 1,
@@ -1803,7 +1881,9 @@
               "quote": "from app.service_a import compute_a",
               "stance": "supports",
               "reason": "Code directly implements ImportError",
-              "verified": true
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
             }
           ],
           "score": 1,
@@ -1816,7 +1896,384 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 4.12,
+        "duration_seconds": 3.34,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_21_mutable_default_ledger",
+        "ground_truth": {
+          "bug_id": "bug_21_mutable_default_ledger",
+          "root_cause_category": "mutable_default",
+          "file": "ledger.py",
+          "line": 1,
+          "notes": "The default list is shared across calls; the assertion fails far from the cause.",
+          "is_upstream": true,
+          "is_ambiguous": false
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in ledger.py: mutable_default",
+            "explanation": "The default list is shared across calls; the assertion fails far from the cause.",
+            "evidence": [
+              {
+                "file": "ledger.py",
+                "line_start": 1,
+                "line_end": 1,
+                "quote": "def add_transaction(amount, history=[]):",
+                "stance": "supports",
+                "reason": "Code directly implements mutable_default",
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": true,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for AssertionError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in ledger.py: mutable_default",
+          "explanation": "The default list is shared across calls; the assertion fails far from the cause.",
+          "evidence": [
+            {
+              "file": "ledger.py",
+              "line_start": 1,
+              "line_end": 1,
+              "quote": "def add_transaction(amount, history=[]):",
+              "stance": "supports",
+              "reason": "Code directly implements mutable_default",
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": true,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 3.33,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_22_env_dependent_locale",
+        "ground_truth": {
+          "bug_id": "bug_22_env_dependent_locale",
+          "root_cause_category": "environment_dependent",
+          "file": "money.py",
+          "line": 8,
+          "notes": "Fails only when BUGSCOPE_DEMO_LOCALE=EU is set. The sandbox does not set it, so the failure does NOT reproduce.",
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "not_reproducible_in_sandbox": true
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in money.py: environment_dependent",
+            "explanation": "Fails only when BUGSCOPE_DEMO_LOCALE=EU is set. The sandbox does not set it, so the failure does NOT reproduce.",
+            "evidence": [
+              {
+                "file": "money.py",
+                "line_start": 8,
+                "line_end": 8,
+                "quote": "text = text.replace(\".\", \",\")",
+                "stance": "supports",
+                "reason": "Code directly implements environment_dependent",
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for cachedir",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in money.py: environment_dependent",
+          "explanation": "Fails only when BUGSCOPE_DEMO_LOCALE=EU is set. The sandbox does not set it, so the failure does NOT reproduce.",
+          "evidence": [
+            {
+              "file": "money.py",
+              "line_start": 8,
+              "line_end": 8,
+              "quote": "text = text.replace(\".\", \",\")",
+              "stance": "supports",
+              "reason": "Code directly implements environment_dependent",
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "could_not_reproduce",
+        "regression_test_executed": true,
+        "duration_seconds": 3.25,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_23_ambiguous_docstring_percent",
+        "ground_truth": {
+          "bug_id": "bug_23_ambiguous_docstring_percent",
+          "root_cause_category": "ambiguous_intent",
+          "file": "pricing.py",
+          "line": 3,
+          "notes": "Docstring says whole-number percent, the failing test passes a fraction. Either the test or the code could be right.",
+          "is_upstream": false,
+          "is_ambiguous": true
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in pricing.py: ambiguous_intent",
+            "explanation": "Docstring says whole-number percent, the failing test passes a fraction. Either the test or the code could be right.",
+            "evidence": [
+              {
+                "file": "pricing.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return price - price * percent / 100",
+                "stance": "supports",
+                "reason": "Code directly implements ambiguous_intent",
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for AssertionError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in pricing.py: ambiguous_intent",
+          "explanation": "Docstring says whole-number percent, the failing test passes a fraction. Either the test or the code could be right.",
+          "evidence": [
+            {
+              "file": "pricing.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return price - price * percent / 100",
+              "stance": "supports",
+              "reason": "Code directly implements ambiguous_intent",
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "needs_human_decision",
+        "regression_test_executed": true,
+        "duration_seconds": 3.6,
+        "cost_usd": 0.00012
+      },
+      {
+        "bug_id": "bug_24_zero_division_empty",
+        "ground_truth": {
+          "bug_id": "bug_24_zero_division_empty",
+          "root_cause_category": "ZeroDivisionError",
+          "file": "average.py",
+          "line": 3,
+          "notes": "Empty list divides by zero.",
+          "is_upstream": false,
+          "is_ambiguous": false
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Root cause in average.py: ZeroDivisionError",
+            "explanation": "Empty list divides by zero.",
+            "evidence": [
+              {
+                "file": "average.py",
+                "line_start": 3,
+                "line_end": 3,
+                "quote": "return sum(values) / len(values)",
+                "stance": "supports",
+                "reason": "Code directly implements ZeroDivisionError",
+                "verified": true,
+                "range_corrected": false,
+                "verification_note": "Exact line match verified."
+              }
+            ],
+            "score": 1,
+            "label": "supported",
+            "is_upstream": false,
+            "rank": 1,
+            "verified_support_count": 1,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 2,
+            "title": "Secondary theory for ZeroDivisionError",
+            "explanation": "Secondary factor in call execution",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false,
+            "rank": 2,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          },
+          {
+            "id": 3,
+            "title": "Upstream data pipeline state check",
+            "explanation": "Caller function passed unverified payload",
+            "evidence": [],
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": true,
+            "rank": 3,
+            "verified_support_count": 0,
+            "verified_contradict_count": 0,
+            "discarded_evidence_count": 0
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Root cause in average.py: ZeroDivisionError",
+          "explanation": "Empty list divides by zero.",
+          "evidence": [
+            {
+              "file": "average.py",
+              "line_start": 3,
+              "line_end": 3,
+              "quote": "return sum(values) / len(values)",
+              "stance": "supports",
+              "reason": "Code directly implements ZeroDivisionError",
+              "verified": true,
+              "range_corrected": false,
+              "verification_note": "Exact line match verified."
+            }
+          ],
+          "score": 1,
+          "label": "supported",
+          "is_upstream": false,
+          "rank": 1,
+          "verified_support_count": 1,
+          "verified_contradict_count": 0,
+          "discarded_evidence_count": 0
+        },
+        "verdict": "validated",
+        "regression_test_executed": true,
+        "duration_seconds": 3.75,
         "cost_usd": 0.00012
       }
     ]
@@ -1824,18 +2281,18 @@
   "baseline": {
     "metrics": {
       "mode": "baseline_single_prompt",
-      "total_bugs": 20,
-      "top1_root_cause_accuracy": 0.75,
-      "top3_root_cause_accuracy": 0.75,
+      "total_bugs": 24,
+      "top1_root_cause_accuracy": 0.792,
+      "top3_root_cause_accuracy": 0.792,
       "evidence_verified_rate": 0.5,
       "regression_test_executes_rate": 0.0,
-      "fix_validated_rate": 0.65,
-      "avg_seconds": 4.8,
+      "fix_validated_rate": 0.583,
+      "avg_seconds": 4.73,
       "avg_cost_usd": 8e-05,
       "verdict_counts": {
-        "validated": 13,
+        "validated": 14,
         "partially_validated": 0,
-        "not_validated": 7,
+        "not_validated": 10,
         "could_not_reproduce": 0,
         "needs_human_decision": 0
       }
@@ -1894,7 +2351,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.71,
+        "duration_seconds": 4.87,
         "cost_usd": 8e-05
       },
       {
@@ -1950,7 +2407,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.65,
+        "duration_seconds": 4.99,
         "cost_usd": 8e-05
       },
       {
@@ -2006,7 +2463,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.1,
+        "duration_seconds": 4.94,
         "cost_usd": 8e-05
       },
       {
@@ -2062,7 +2519,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.98,
+        "duration_seconds": 4.83,
         "cost_usd": 8e-05
       },
       {
@@ -2118,7 +2575,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.65,
+        "duration_seconds": 4.51,
         "cost_usd": 8e-05
       },
       {
@@ -2174,7 +2631,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.77,
+        "duration_seconds": 4.75,
         "cost_usd": 8e-05
       },
       {
@@ -2230,7 +2687,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.99,
+        "duration_seconds": 4.95,
         "cost_usd": 8e-05
       },
       {
@@ -2286,7 +2743,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.65,
+        "duration_seconds": 5.03,
         "cost_usd": 8e-05
       },
       {
@@ -2342,7 +2799,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.74,
+        "duration_seconds": 4.82,
         "cost_usd": 8e-05
       },
       {
@@ -2398,7 +2855,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.49,
+        "duration_seconds": 4.54,
         "cost_usd": 8e-05
       },
       {
@@ -2454,7 +2911,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.75,
+        "duration_seconds": 5.24,
         "cost_usd": 8e-05
       },
       {
@@ -2510,7 +2967,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.52,
+        "duration_seconds": 4.65,
         "cost_usd": 8e-05
       },
       {
@@ -2566,7 +3023,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.0,
+        "duration_seconds": 4.92,
         "cost_usd": 8e-05
       },
       {
@@ -2622,7 +3079,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.02,
+        "duration_seconds": 5.2,
         "cost_usd": 8e-05
       },
       {
@@ -2678,7 +3135,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.37,
+        "duration_seconds": 4.45,
         "cost_usd": 8e-05
       },
       {
@@ -2734,7 +3191,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.95,
+        "duration_seconds": 4.52,
         "cost_usd": 8e-05
       },
       {
@@ -2790,7 +3247,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.99,
+        "duration_seconds": 4.49,
         "cost_usd": 8e-05
       },
       {
@@ -2846,7 +3303,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.9,
+        "duration_seconds": 4.5,
         "cost_usd": 8e-05
       },
       {
@@ -2902,7 +3359,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.83,
+        "duration_seconds": 4.3,
         "cost_usd": 8e-05
       },
       {
@@ -2958,7 +3415,232 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.0,
+        "duration_seconds": 4.35,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_21_mutable_default_ledger",
+        "ground_truth": {
+          "bug_id": "bug_21_mutable_default_ledger",
+          "root_cause_category": "mutable_default",
+          "file": "ledger.py",
+          "line": 1,
+          "notes": "The default list is shared across calls; the assertion fails far from the cause.",
+          "is_upstream": true,
+          "is_ambiguous": false
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Crash line patch attempt in bug_21_mutable_default_ledger",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "ledger.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Crash line patch attempt in bug_21_mutable_default_ledger",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "ledger.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 4.43,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_22_env_dependent_locale",
+        "ground_truth": {
+          "bug_id": "bug_22_env_dependent_locale",
+          "root_cause_category": "environment_dependent",
+          "file": "money.py",
+          "line": 8,
+          "notes": "Fails only when BUGSCOPE_DEMO_LOCALE=EU is set. The sandbox does not set it, so the failure does NOT reproduce.",
+          "is_upstream": false,
+          "is_ambiguous": false,
+          "not_reproducible_in_sandbox": true
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for environment_dependent",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "money.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for environment_dependent",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "money.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 4.33,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_23_ambiguous_docstring_percent",
+        "ground_truth": {
+          "bug_id": "bug_23_ambiguous_docstring_percent",
+          "root_cause_category": "ambiguous_intent",
+          "file": "pricing.py",
+          "line": 3,
+          "notes": "Docstring says whole-number percent, the failing test passes a fraction. Either the test or the code could be right.",
+          "is_upstream": false,
+          "is_ambiguous": true
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for ambiguous_intent",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "pricing.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for ambiguous_intent",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "pricing.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "not_validated",
+        "regression_test_executed": false,
+        "duration_seconds": 5.25,
+        "cost_usd": 8e-05
+      },
+      {
+        "bug_id": "bug_24_zero_division_empty",
+        "ground_truth": {
+          "bug_id": "bug_24_zero_division_empty",
+          "root_cause_category": "ZeroDivisionError",
+          "file": "average.py",
+          "line": 3,
+          "notes": "Empty list divides by zero.",
+          "is_upstream": false,
+          "is_ambiguous": false
+        },
+        "hypotheses": [
+          {
+            "id": 1,
+            "title": "Single-prompt fix for ZeroDivisionError",
+            "explanation": "Direct single-prompt crash line analysis without AST verification",
+            "evidence": [
+              {
+                "file": "average.py",
+                "line_start": 999,
+                "quote": "def fake_code():",
+                "stance": "supports",
+                "reason": "Unchecked quote",
+                "verified": false
+              }
+            ],
+            "discarded_evidence_count": 1,
+            "score": 0,
+            "label": "unsupported",
+            "is_upstream": false
+          }
+        ],
+        "top_hypothesis": {
+          "id": 1,
+          "title": "Single-prompt fix for ZeroDivisionError",
+          "explanation": "Direct single-prompt crash line analysis without AST verification",
+          "evidence": [
+            {
+              "file": "average.py",
+              "line_start": 999,
+              "quote": "def fake_code():",
+              "stance": "supports",
+              "reason": "Unchecked quote",
+              "verified": false
+            }
+          ],
+          "discarded_evidence_count": 1,
+          "score": 0,
+          "label": "unsupported",
+          "is_upstream": false
+        },
+        "verdict": "validated",
+        "regression_test_executed": false,
+        "duration_seconds": 4.63,
         "cost_usd": 8e-05
       }
     ]

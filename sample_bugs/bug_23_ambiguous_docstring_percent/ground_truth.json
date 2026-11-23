@@ -1,0 +1,9 @@
+{
+  "bug_id": "bug_23_ambiguous_docstring_percent",
+  "root_cause_category": "ambiguous_intent",
+  "file": "pricing.py",
+  "line": 3,
+  "notes": "Docstring says whole-number percent, the failing test passes a fraction. Either the test or the code could be right.",
+  "is_upstream": false,
+  "is_ambiguous": true
+}

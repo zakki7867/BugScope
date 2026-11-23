@@ -1,0 +1,10 @@
+{
+  "bug_id": "bug_22_env_dependent_locale",
+  "root_cause_category": "environment_dependent",
+  "file": "money.py",
+  "line": 8,
+  "notes": "Fails only when BUGSCOPE_DEMO_LOCALE=EU is set. The sandbox does not set it, so the failure does NOT reproduce.",
+  "is_upstream": false,
+  "is_ambiguous": false,
+  "not_reproducible_in_sandbox": true
+}

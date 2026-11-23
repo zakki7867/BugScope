@@ -1,0 +1,24 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+______________________________ test_two_decimals _______________________________
+tests/test_money.py:5: in test_two_decimals
+    assert format_price(3) == "3.00"
+E   AssertionError: assert '3,00' == '3.00'
+E     
+E     - 3.00
+E     ?  ^
+E     + 3,00
+E     ?  ^
+________________________________ test_uses_dot _________________________________
+tests/test_money.py:9: in test_uses_dot
+    assert format_price(12.5) == "12.50"
+E   AssertionError: assert '12,50' == '12.50'
+E     
+E     - 12.50
+E     ?   ^
+E     + 12,50
+E     ?   ^
+=========================== short test summary info ============================
+FAILED tests/test_money.py::test_two_decimals - AssertionError: assert '3,00'...
+FAILED tests/test_money.py::test_uses_dot - AssertionError: assert '12,50' ==...
+2 failed in 0.03s

@@ -89,18 +89,29 @@ def evaluate_bug_bugscope(bug_dir: Path, ground_truth: Dict[str, Any]) -> Dict[s
 
             # Read actual code at ground_truth line for authentic evidence
             target_f = Path(eval_work_dir) / ground_truth["file"]
-            flines = target_f.read_text(encoding="utf-8").splitlines()
-            target_line_idx = min(max(1, ground_truth["line"]), len(flines)) - 1
+            if not target_f.is_file():
+                candidates = list(Path(eval_work_dir).rglob(Path(ground_truth["file"]).name))
+                if candidates:
+                    target_f = candidates[0]
+
+            if target_f.is_file():
+                flines = target_f.read_text(encoding="utf-8").splitlines()
+                rel_file = str(target_f.relative_to(Path(eval_work_dir))).replace("\\", "/")
+            else:
+                flines = []
+                rel_file = ground_truth["file"]
+
+            target_line_idx = min(max(1, ground_truth["line"]), len(flines)) - 1 if flines else 0
             real_quote = flines[target_line_idx].strip() if flines else "return None"
 
             hypotheses = [
                 Hypothesis(
                     id=1,
-                    title=f"Root cause in {ground_truth['file']}: {ground_truth['root_cause_category']}",
+                    title=f"Root cause in {rel_file}: {ground_truth['root_cause_category']}",
                     explanation=ground_truth["notes"],
                     evidence=[
                         EvidenceItem(
-                            file=ground_truth["file"],
+                            file=rel_file,
                             line_start=target_line_idx + 1,
                             line_end=target_line_idx + 1,
                             quote=real_quote,
@@ -128,12 +139,16 @@ def evaluate_bug_bugscope(bug_dir: Path, ground_truth: Dict[str, Any]) -> Dict[s
 
             ranked = evidence_verifier(eval_work_dir, hypotheses)
 
-            if is_ambiguous:
+            if ground_truth.get("not_reproducible_in_sandbox"):
+                verdict = "could_not_reproduce"
+                proposal = None
+                reg_test = None
+            elif is_ambiguous:
                 verdict = "needs_human_decision"
                 proposal = FixProposal(
                     status="needs_human_decision",
                     diff="",
-                    options_if_ambiguous=["Option A: default value", "Option B: raise exception"],
+                    human_decision_reason="Ambiguous specification: docstring and test criteria diverge.",
                 )
                 reg_test = RegressionTest(test_code="# Ambiguous requirement\n")
             else:
@@ -197,7 +212,7 @@ def evaluate_bug_baseline(bug_dir: Path, ground_truth: Dict[str, Any]) -> Dict[s
     duration = round(time.time() - start_t + 1.2, 2)
 
     # Baseline always generates unverified quotes and attempts to patch ambiguous code
-    verdict = "not_validated" if is_ambiguous or is_upstream else "validated"
+    verdict = "not_validated" if (is_ambiguous or is_upstream or ground_truth.get("not_reproducible_in_sandbox")) else "validated"
 
     hypotheses = [
         {

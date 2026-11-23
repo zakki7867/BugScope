@@ -1,0 +1,10 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+________________________ test_histories_are_independent ________________________
+tests/test_ledger.py:11: in test_histories_are_independent
+    assert balance(second) == 50
+E   assert 150 == 50
+E    +  where 150 = balance([100, 50])
+=========================== short test summary info ============================
+FAILED tests/test_ledger.py::test_histories_are_independent - assert 150 == 50
+1 failed, 1 passed in 0.03s

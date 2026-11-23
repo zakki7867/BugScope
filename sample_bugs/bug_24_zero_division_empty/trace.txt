@@ -1,0 +1,13 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_______________________________ test_empty_mean ________________________________
+tests/test_average.py:9: in test_empty_mean
+    assert mean([]) == 0.0
+           ^^^^^^^^
+average.py:3: in mean
+    return sum(values) / len(values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ZeroDivisionError: division by zero
+=========================== short test summary info ============================
+FAILED tests/test_average.py::test_empty_mean - ZeroDivisionError: division b...
+1 failed, 1 passed in 0.03s

@@ -156,6 +156,12 @@ def apply_patch_to_directory(repo_dir: str, diff_text: str) -> List[str]:
     if not patches:
         raise PatchError("Could not parse any valid hunks from unified diff.")
 
+    # Security check: never allow patches to rewrite existing test files
+    for rel_p in patches.keys():
+        clean_p = rel_p.lower()
+        if "test_" in clean_p or "_test.py" in clean_p or "tests/" in clean_p:
+            raise PatchError(f"Patch is not permitted to edit existing test file '{rel_p}'. Fix must modify application code.")
+
     repo_path = Path(repo_dir).resolve()
     modified_files: List[str] = []
 
