@@ -11,7 +11,10 @@ from typing import Optional
 from app import __version__
 from app.schemas.failure import FailureReport
 from app.schemas.context import ContextBundle
+from app.schemas.report import InvestigationReport
+from app.database.db import get_investigation, list_investigations, save_investigation
 from app.services.zip_handler import create_temp_repo_from_zip, ZipSecurityError
+from app.workflow.graph import create_bugscope_graph
 from app.workflow.nodes.failure_analyzer import failure_analyzer
 from app.workflow.nodes.repo_investigator import repo_investigator
 
@@ -87,6 +90,48 @@ async def upload_zip_and_investigate(
         failure_report=failure_rep,
         context_bundle=context_bun,
     )
+
+
+class RunInvestigationRequest(BaseModel):
+    """Request payload to execute full BugScope workflow."""
+    raw_trace: str = Field(..., description="Pasted error trace", min_length=1)
+    repo_dir: Optional[str] = Field(default=None, description="Optional local directory path")
+
+
+@app.post("/api/investigate/run", response_model=InvestigationReport)
+def run_investigation_endpoint(request: RunInvestigationRequest):
+    """Execute end-to-end evidence-checked investigation graph."""
+    repo_path = request.repo_dir or "."
+    graph = create_bugscope_graph()
+
+    initial_state = {
+        "raw_trace": request.raw_trace,
+        "repo_dir": repo_path,
+        "traces": [],
+        "retries_used": 0,
+        "max_retries": 2,
+    }
+
+    final_state = graph.invoke(initial_state)
+    report = final_state.get("investigation_report")
+    if not report:
+        raise HTTPException(status_code=500, detail="Workflow failed to generate an investigation report.")
+    return report
+
+
+@app.get("/api/investigations")
+def list_investigations_endpoint(limit: int = 50):
+    """List recent investigations."""
+    return list_investigations(limit=limit)
+
+
+@app.get("/api/investigations/{investigation_id}", response_model=InvestigationReport)
+def get_investigation_endpoint(investigation_id: str):
+    """Retrieve full investigation report by ID."""
+    report = get_investigation(investigation_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Investigation not found.")
+    return report
 
 
 if __name__ == "__main__":

@@ -14,10 +14,16 @@ from app.workflow.nodes.failure_analyzer import failure_analyzer
 from app.workflow.nodes.fix_generator import fix_generator
 from app.workflow.nodes.hypothesis_generator import hypothesis_generator
 from app.workflow.nodes.repo_investigator import repo_investigator
+from app.workflow.nodes.report_builder import report_builder
 from app.workflow.nodes.reproducer import reproducer
 from app.workflow.nodes.test_generator import test_generator
 from app.workflow.nodes.validator import validator
 from app.workflow.state import BugScopeState
+
+
+def node_report_builder(state: BugScopeState) -> Dict[str, Any]:
+    """Node 9: Assemble final investigation report and save to database."""
+    return report_builder(state)
 
 
 def node_failure_analyzer(state: BugScopeState) -> Dict[str, Any]:
@@ -213,23 +219,23 @@ def node_validator(state: BugScopeState) -> Dict[str, Any]:
 
 
 # Router conditionals
-def route_after_evidence(state: BugScopeState) -> Literal["fix_generator", "__end__"]:
+def route_after_evidence(state: BugScopeState) -> Literal["fix_generator", "report_builder"]:
     """Route after evidence verification."""
     top = state.get("top_hypothesis")
     if not top or top.label == "unsupported":
-        return "__end__"
+        return "report_builder"
     return "fix_generator"
 
 
-def route_after_fix(state: BugScopeState) -> Literal["test_generator", "__end__"]:
+def route_after_fix(state: BugScopeState) -> Literal["test_generator", "report_builder"]:
     """Route after fix proposal."""
     proposal = state.get("fix_proposal")
     if not proposal or proposal.status == "needs_human_decision":
-        return "__end__"
+        return "report_builder"
     return "test_generator"
 
 
-def route_after_validator(state: BugScopeState) -> Literal["fix_generator", "__end__"]:
+def route_after_validator(state: BugScopeState) -> Literal["fix_generator", "report_builder"]:
     """Route after validator: retry fix if validation failed and retries remain."""
     val_rep = state.get("validation_report")
     retries = state.get("retries_used", 0)
@@ -238,7 +244,7 @@ def route_after_validator(state: BugScopeState) -> Literal["fix_generator", "__e
     if val_rep and val_rep.verdict != "validated" and retries < max_retries:
         state["retries_used"] = retries + 1
         return "fix_generator"
-    return "__end__"
+    return "report_builder"
 
 
 def create_bugscope_graph() -> StateGraph:
@@ -254,6 +260,7 @@ def create_bugscope_graph() -> StateGraph:
     workflow.add_node("fix_generator", node_fix_generator)
     workflow.add_node("test_generator", node_test_generator)
     workflow.add_node("validator", node_validator)
+    workflow.add_node("report_builder", node_report_builder)
 
     # Linear deterministic chain
     workflow.set_entry_point("failure_analyzer")
@@ -266,24 +273,27 @@ def create_bugscope_graph() -> StateGraph:
     workflow.add_conditional_edges(
         "evidence_verifier",
         route_after_evidence,
-        {"fix_generator": "fix_generator", "__end__": END},
+        {"fix_generator": "fix_generator", "report_builder": "report_builder"},
     )
 
     # Conditional routing after fix generation
     workflow.add_conditional_edges(
         "fix_generator",
         route_after_fix,
-        {"test_generator": "test_generator", "__end__": END},
+        {"test_generator": "test_generator", "report_builder": "report_builder"},
     )
 
     # Test generator proceeds directly to validator
     workflow.add_edge("test_generator", "validator")
 
-    # Conditional retry loop from validator back to fix_generator
+    # Conditional retry loop from validator back to fix_generator or forward to report_builder
     workflow.add_conditional_edges(
         "validator",
         route_after_validator,
-        {"fix_generator": "fix_generator", "__end__": END},
+        {"fix_generator": "fix_generator", "report_builder": "report_builder"},
     )
+
+    # Report builder terminates the workflow
+    workflow.add_edge("report_builder", END)
 
     return workflow.compile()

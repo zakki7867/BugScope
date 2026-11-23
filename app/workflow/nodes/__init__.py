@@ -8,6 +8,7 @@ from app.workflow.nodes.evidence_verifier import evidence_verifier
 from app.workflow.nodes.fix_generator import fix_generator
 from app.workflow.nodes.test_generator import test_generator
 from app.workflow.nodes.validator import validator
+from app.workflow.nodes.report_builder import report_builder
 
 __all__ = [
     "failure_analyzer",
@@ -18,4 +19,5 @@ __all__ = [
     "fix_generator",
     "test_generator",
     "validator",
+    "report_builder",
 ]

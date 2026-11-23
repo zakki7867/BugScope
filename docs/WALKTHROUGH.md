@@ -167,6 +167,31 @@ BugScope introduces **evidence-checked debugging**:
 - **Interview explanation**:
   > *"LangGraph coordinates our deterministic and LLM nodes as a typed state machine with explicit retry loops and conditional exits."*
 
+---
+
+## 7. Milestone 6 Architecture
+
+### `app/database/db.py` — SQLite Persistence Layer
+- **What it does**: Stores all past investigations and their fine-grained node traces.
+- **Key design choice**: Stores relational metadata (verdict, error type, file, line, runtime, cost) for fast filtering and pagination, alongside the complete immutable `report_json` document.
+- **Interview explanation**:
+  > *"SQLite provides zero-configuration, ACID-compliant persistence without requiring a separate database server. Storing both queryable columns and the full JSON document gives us fast dashboard queries with complete fidelity."*
+
+### `app/workflow/nodes/report_builder.py` — Master Telemetry Aggregator
+- **What it does**: Assembles the final `InvestigationReport`, sums token counts, duration, and dollar costs across all pipeline stages, and commits the result to SQLite.
+- **Interview explanation**:
+  > *"Observability is essential in production AI agents. BugScope logs latency, token consumption, and dollar costs per node so users can see exactly where compute time and money were spent."*
+
+### `frontend/streamlit_app.py` — Interactive Debugging Dashboard
+- **What it does**: A dual-page Streamlit application ("New Investigation" and "History") offering deep visibility into agent reasoning:
+  - **Verdict Badges**: Prominent badges with honest limitation statements.
+  - **Evidence Verification Tab**: Shows verified supporting, verified contradicting, and discarded hallucinated quote counts.
+  - **Diff Viewer**: Displays minimal unified diffs with explicit behavioral assumptions and side effects.
+  - **Telemetry Trace Tab**: Live per-node audit trail with cost and duration metrics.
+- **Interview explanation**:
+  > *"Our dashboard is built specifically for developer trust. Rather than presenting a chatbot interface, it gives engineers inspection tabs for hypotheses, mechanical evidence quotes, code diffs, and execution traces."*
+
+
 
 
 

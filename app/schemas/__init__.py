@@ -11,6 +11,7 @@ from app.schemas.hypothesis import (
 )
 from app.schemas.fix import FixProposal, RegressionTest
 from app.schemas.validation import ValidationReport, VerdictType
+from app.schemas.report import TraceEntry, InvestigationReport
 
 __all__ = [
     "FailureCategory",
@@ -27,4 +28,6 @@ __all__ = [
     "RegressionTest",
     "ValidationReport",
     "VerdictType",
+    "TraceEntry",
+    "InvestigationReport",
 ]
