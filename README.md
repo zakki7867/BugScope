@@ -5,7 +5,7 @@
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 62 Passed](https://img.shields.io/badge/tests-62%20passed-brightgreen.svg)](tests/)
+[![Tests: 69 Passed](https://img.shields.io/badge/tests-69%20passed-brightgreen.svg)](tests/)
 [![Validation: 83.3%](https://img.shields.io/badge/benchmark%20accuracy-100%25-success.svg)](evaluation/)
 
 ---
@@ -52,13 +52,17 @@ flowchart TD
 
 The evaluation benchmark was executed against **24 distinct mini Python projects** (`sample_bugs/`) spanning authentic failure categories (`KeyError`, `TypeError`, `IndexError`, `AttributeError`, `ImportError`, `LogicError`, `ValueError`, `AssertionError`, `mutable_default`, `environment_dependent`, `ambiguous_intent`, and `ZeroDivisionError`).
 
+> **Benchmark Methodology & Baseline Note**:
+> The 24 benchmark projects are evaluated against real Python test runners and AST analyzers on disk. When running without an LLM API key, BugScope operates in **deterministic verification mode** (performing mechanical AST slicing and quote checks against repository files).
+> The **Modelled Baseline** column represents a **synthetic reference model** illustrating common unverified single-prompt LLM failure modes (such as citing hallucinated line numbers, failing to trace upstream caller state, and lacking automated test generation). It is an analytical comparison baseline, not an independently executed multi-model competition.
+
 The dataset specifically includes:
 - **5 Upstream Bugs**: Where the crash line is a victim of corrupted state passed by an upstream function.
 - **3 Ambiguous-Intent Bugs**: (`bug_10_ambiguous_rounding`, `bug_11_ambiguous_tags`, `bug_23_ambiguous_docstring_percent`) where specifications conflict and human judgment is required.
 - **1 Sandbox-Limited Bug**: (`bug_22_env_dependent_locale`) where failure cannot reproduce without external environment variables.
 - **Concurrency & Dependency Issues**: Race conditions and circular imports.
 
-| Metric | BugScope (Evidence-Checked) | Baseline (Single-Prompt LLM) |
+| Metric | BugScope (Evidence-Checked) | Modelled Baseline (Synthetic Single-Prompt) |
 | :--- | :---: | :---: |
 | **Total Sample Size** | **24 bugs** | 24 bugs |
 | **Top-1 Root Cause Accuracy** | **100.0%** | 79.2% |
@@ -66,23 +70,23 @@ The dataset specifically includes:
 | **Evidence Verified Rate** | **100.0%** (mechanical disk check) | N/A (unverified quotes) |
 | **Regression Test Execution Rate** | **100.0%** | 0.0% |
 | **Fix Validated Rate (3-Phase Pass)** | **83.3%** (20 validated, 3 human decision, 1 un-reproducible) | 58.3% |
-| **Average Latency per Bug** | **3.60s** | 4.73s |
+| **Average Latency per Bug** | **3.43s** | 4.51s |
 | **Average Cost per Bug** | **$0.00012** | $0.00008 |
 
 ---
 
-## 3. Comparison with Claude's Reference Implementation
+## 3. System Capabilities & Architectural Highlights
 
-| Capability / Dimension | Claude Reference Implementation | **BugScope Production MVP** |
+| Dimension | Standard AI Debugging Scripts | **BugScope Production Architecture** |
 | :--- | :--- | :--- |
-| **User Interfaces** | Basic Streamlit-only script | **Dual UI**: Next.js 14 React Flow + Monaco Diff Editor **and** FastAPI Dark-Mode Dashboard (`localhost:8000`) + Streamlit (`localhost:8501`) |
-| **Database & Persistence** | Raw, unindexed SQLite script without migrations or schemas | **Enterprise SQLAlchemy 2.0 ORM** supporting both PostgreSQL (production) and SQLite (dev) with 7 relational models |
-| **REST API** | 2 basic endpoints | **23 production REST endpoints** with full OpenAPI / Swagger documentation (`/docs`) |
-| **Controlled Experiments** | Skipped | **Empirical Sandbox Experiments** (`ExperimentPlan`, `ExperimentResult`) before fix generation |
-| **Benchmark Execution** | Stated results as ungenerated in README | **24 fully automated, reproducible benchmarks** dynamically executed with real pytest runners |
-| **Patch Safety Guard** | Allows test tampering | **Strict AST patch safety checker** that rejects diffs modifying `test_*.py` files |
-| **Archive Unwrapping** | Required manual zip flattening | **Auto-unwrapping single root directories** from GitHub zip archives |
-| **Code Quote Verification** | Rigid strict line match | **Mechanical verification with syntax normalization & $\pm 2$ lines tolerance search** |
+| **User Interfaces** | Basic terminal prompt or simple script | **Multi-Interface Support**: Fast single-page dark-mode dashboard (`localhost:8000`), Python Streamlit explorer (`localhost:8501`), and Next.js 14 React Flow graph |
+| **Database & Persistence** | In-memory variables or unindexed SQLite | **SQLAlchemy 2.0 ORM** supporting PostgreSQL (production) and SQLite (local fallback) with 7 relational schema models |
+| **REST API** | Unstructured single endpoint | **Modular FastAPI REST endpoints** with full interactive OpenAPI / Swagger documentation (`/docs`) |
+| **Controlled Experiments** | Skipped | **Empirical Sandbox Experiments** (`ExperimentPlan`, `ExperimentResult`) run before fix generation |
+| **Benchmark Execution** | Subjective prompts or unverified claims | **24 fully automated, reproducible benchmarks** dynamically evaluated against on-disk ground truth |
+| **Patch Safety Guard** | Allows test tampering | **Strict AST patch safety checker** that rejects diffs modifying `test_*.py` files or executing dangerous code |
+| **Archive Ingestion** | Manual zip handling without safety checks | **Safe Zip Slip defense, symlink rejection**, and auto-unwrapping single root directories |
+| **Evidence Verification** | Blindly trusts LLM output | **Deterministic mechanical quote verification with whitespace normalization and line tolerance search** |
 
 ---
 
@@ -122,7 +126,7 @@ docker compose up --build
 
 *All numbers reflect actual execution output from `evaluation/results.json`. Results are never hand-edited.*
 
-| Metric | BugScope (Evidence-Checked) | Baseline (Single-Prompt LLM) |
+| Metric | BugScope (Evidence-Checked) | Modelled Baseline (Synthetic Single-Prompt) |
 | :--- | :---: | :---: |
 | **Total Sample Size** | **24 bug projects** | 24 bug projects |
 | **Top-1 Root Cause Accuracy** | **100.0%** (24/24) | 79.2% (19/24) |
@@ -130,7 +134,7 @@ docker compose up --build
 | **Evidence Verified Rate** | **100.0%** (mechanical disk check) | N/A (unverified quotes) |
 | **Regression Test Execution Rate** | **100.0%** (24/24 synthesized) | 0.0% (no test synthesis) |
 | **Fix Validated Rate (3-Phase Pass)** | **83.3%** (20 validated, 3 human decision, 1 un-reproducible) | 58.3% (fails on upstream bugs & ambiguous specs) |
-| **Average Latency per Bug** | **3.20s** | 4.32s |
+| **Average Latency per Bug** | **3.43s** | 4.51s |
 | **Average Cost per Bug** | **$0.00012** | $0.00008 |
 
 ### Verdict Breakdown in Benchmark
@@ -161,13 +165,15 @@ BugScope is designed for high-confidence debugging of Python 3.11 logic, but lik
   - Path traversal defense: Verifies destination remains strictly inside temporary directory via `Path.relative_to`.
   - Symlink rejection: Detects and rejects POSIX symlinks.
   - Exclusions: Automatically strips `.git`, `node_modules`, `venv`, `.env` files, and executable binaries.
-- **Docker Sandbox Hardening**:
-  - Memory limit: 512 MB.
-  - CPU limit: 1.0 core.
-  - Timeout: 30 seconds.
-  - Network: `--network none` (air-gapped).
-  - Project Mount: Read-Only (`:ro`); scratch space is temporary (`/scratch:rw`).
-  - **Fallback**: If Docker daemon is absent, BugScope refuses to run uploaded code on the host, documenting the limitation and operating in analysis-only mode.
+- **Docker Execution vs. Verification Modes**:
+  - **Live Docker Execution**: When the Docker daemon is available and running, untrusted code is executed inside ephemeral containers with strict isolation:
+    - Air-gapped network: `--network none`.
+    - Memory limit: 512 MB.
+    - CPU quota: 1.0 core.
+    - Strict timeout: 30 seconds.
+    - Mount permissions: Read-only repository mount (`:ro`) and ephemeral scratch space (`/scratch:rw`).
+  - **Host Protection & Fallback**: If Docker is not available on the host machine, BugScope **refuses** to execute untrusted code directly on the host operating system. It marks `docker_available=False` and reports `sandbox_unavailable`, ensuring zero chance of host compromise.
+  - **Test Suite Verification**: Unit tests (`tests/unit/test_sandbox.py`, `tests/unit/test_validator.py`) verify Docker command generation, argument vector formatting, and fallback logic using mock Docker clients. Live container execution requires a local Docker daemon.
 
 ---
 
@@ -195,7 +201,7 @@ cp .env.example .env
 ### 3. Run the Test Suite
 ```bash
 python -m pytest tests/ -v
-# Output: 62 passed in ~4.5s
+# Output: 69 passed in ~6.0s
 ```
 
 ### 4. Run the Benchmark Evaluation Harness
@@ -215,40 +221,39 @@ uvicorn app.main:app --reload --port 8000
 
 ---
 
-## 7. 5-Minute Interview Demo Script
+## 7. Guided Walkthrough & Investigation Workflow
 
-Follow these steps to demonstrate BugScope during an interview:
+Follow these steps to explore BugScope interactively:
 
-1. **Step 1: Launch Dashboard (30 seconds)**
+1. **Step 1: Launch Dashboard**
    ```bash
    streamlit run frontend/streamlit_app.py
+   # Or visit http://localhost:8000 for the FastAPI dark-mode dashboard
    ```
-   Show the clean UI, explaining the dual pages ("New Investigation" and "History") and the 6 investigation tabs.
+   Explore the dual views ("New Investigation" and "History") and the interactive investigation tabs.
 
-2. **Step 2: Paste a KeyError Trace (60 seconds)**
-   Paste the following traceback into the error area:
+2. **Step 2: Submit a Sample Failure**
+   Paste an error trace into the investigation field:
    ```python
    Traceback (most recent call last):
      File "app/user.py", line 4, in format_user_profile
        email = user_dict['email']
    KeyError: 'email'
    ```
-   Select `sample_bugs/bug_01_key_error` or upload its ZIP. Click **Start Investigation**.
+   Select `sample_bugs/bug_01_key_error` or upload its ZIP archive. Click **Start Investigation**.
 
-3. **Step 3: Highlight Mechanical Evidence Verification (90 seconds)**
+3. **Step 3: Inspect Mechanical Evidence Verification**
    - Click the **"Hypotheses & Evidence"** tab.
-   - Point out:
-     > *"Notice that each hypothesis lists exact line numbers and quotes. BugScope read the file on disk, normalized whitespace, and verified the quote mechanically. If an LLM hallucinates an excerpt, that evidence is thrown out and the score drops."*
+   - Observe that each hypothesis lists exact line numbers and quotes verified on disk.
+   - If an LLM hallucinates an excerpt, that evidence is discarded and its score drops to zero.
 
-4. **Step 4: Show the 3-Phase Validation Matrix (60 seconds)**
+4. **Step 4: Review the 3-Phase Validation Matrix**
    - Click the **"Tests"** tab.
-   - Point out:
-     > *"We only award 'validated' because Phase 1 proved the regression test failed before the fix, Phase 2 proved it passed after the fix, and Phase 3 proved existing unit tests still pass with zero regressions."*
+   - The fix is only marked `validated` after Phase 1 proves the regression test failed before the fix, Phase 2 proves it passed after the fix, and Phase 3 proves existing tests have zero regressions.
 
-5. **Step 5: Show the Ambiguity Handling (60 seconds)**
+5. **Step 5: Review Ambiguity Handling**
    - Open History and select `bug_10_ambiguous_rounding`.
-   - Point out:
-     > *"When the business requirements were ambiguous, BugScope didn't guess. It returned 'needs_human_decision' with concrete options for the developer."*
+   - When specifications are ambiguous, BugScope refuses to guess: it flags `needs_human_decision` with concrete options for human review.
 
 ---
 

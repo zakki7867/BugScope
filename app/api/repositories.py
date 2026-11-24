@@ -83,9 +83,12 @@ async def upload_repository_zip(file: UploadFile = File(...)):
 
 
 @router.get("/list")
+@router.get("/sample-bugs")
 def list_repositories():
     """List seeded benchmark bug repositories and available sample projects."""
-    sample_bugs_dir = Path("sample_bugs")
+    sample_bugs_dir = Path(__file__).resolve().parent.parent.parent / "sample_bugs"
+    if not sample_bugs_dir.is_dir():
+        sample_bugs_dir = Path("sample_bugs")
     available = []
     if sample_bugs_dir.is_dir():
         for bug_dir in sorted(sample_bugs_dir.iterdir()):
@@ -116,7 +119,7 @@ def list_repositories():
                     "description": description,
                     "sample_trace": sample_trace,
                 })
-    return {"repositories": available}
+    return {"repositories": available, "bugs": available}
 
 
 @router.get("/tree")

@@ -1,10 +1,10 @@
-# BugScope: 5-Minute Technical Interview Demonstration Script
+# BugScope: Live Demonstration & Feature Walkthrough Guide
 
-This document provides a timed, high-impact demonstration script designed for computer science students and engineers presenting **BugScope** in AI/ML, Software Engineering, or Agentic AI job interviews.
+This document provides a timed, high-impact demonstration guide for presenting **BugScope** to technical audiences, engineering teams, and open-source contributors.
 
 ---
 
-## Pre-Demo Checklist (1 Minute Before Interview)
+## Pre-Demo Checklist (1 Minute Setup)
 1. **FastAPI Backend & Interactive Web UI:**
    Ensure the backend is running at `http://localhost:8000`:
    ```bash

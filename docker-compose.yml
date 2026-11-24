@@ -7,10 +7,10 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-bugscope}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bugscope_secret_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Error: POSTGRES_PASSWORD must be configured in your .env file}
       POSTGRES_DB: ${POSTGRES_DB:-bugscope}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -29,7 +29,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-bugscope}:${POSTGRES_PASSWORD:-bugscope_secret_password}@postgres:5432/${POSTGRES_DB:-bugscope}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-bugscope}:${POSTGRES_PASSWORD:?Error: POSTGRES_PASSWORD must be configured in your .env file}@postgres:5432/${POSTGRES_DB:-bugscope}
       BUGSCOPE_HOST: 0.0.0.0
       BUGSCOPE_PORT: 8000
     ports:

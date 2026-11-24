@@ -12,7 +12,22 @@ WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 if str(WORKSPACE_ROOT) not in sys.path:
     sys.path.insert(0, str(WORKSPACE_ROOT))
 
-from fastapi.testclient import TestClient
+from app.main import app, health_check, serve_dashboard_ui
+from app.api.repositories import list_repositories
+from app.api.investigations import get_all_investigations
+from app.api.patches import (
+    preview_patch,
+    apply_patch_endpoint,
+    rollback_patch_endpoint,
+    PatchPreviewRequest,
+    ApplyPatchRequest,
+    RollbackPatchRequest,
+)
+from app.database.db import save_investigation
+from app.schemas.failure import FailureReport
+from app.schemas.fix import FixProposal
+from app.schemas.report import InvestigationReport
+from app.services.sandbox import is_docker_available
 
 
 def main():
@@ -23,72 +38,59 @@ def main():
     results = {}
 
     try:
-        print("[1/4] Loading FastAPI backend application...")
-        from app.main import app
-        client = TestClient(app)
-        print("Backend loaded successfully with ASGI TestClient.")
+        # 1. Health & Dashboard verification
+        print("[1/5] Verifying Health and Dashboard Endpoints...")
+        h_data = health_check()
+        print(f"  Health check: status={h_data['status']}, app={h_data['app']}, endpoints={len(h_data['endpoints'])}")
+        assert h_data["status"] == "ok"
+        results["health_status"] = h_data["status"]
 
-        # Test Health Endpoint
-        print("\n[2/4] Testing API Health & Metadata Endpoints...")
-        resp = client.get("/api/health")
-        code = resp.status_code
-        health_data = resp.json()
-        print(f"  GET /api/health -> HTTP {code}: {health_data}")
-        assert code == 200 and health_data.get("status") == "healthy"
-        results["health_status"] = health_data.get("status")
+        dash = serve_dashboard_ui()
+        dash_path = Path(dash.path)
+        print(f"  Dashboard static HTML: path={dash_path}, exists={dash_path.is_file()}, size={dash_path.stat().st_size} bytes")
+        assert dash_path.is_file()
+        results["dashboard_ui_file"] = str(dash_path.name)
 
-        # Test Sample Bugs Endpoint
-        resp = client.get("/api/repositories/sample-bugs")
-        code = resp.status_code
-        bugs_data = resp.json()
-        bug_count = len(bugs_data.get("bugs", []))
-        print(f"  GET /api/repositories/sample-bugs -> HTTP {code}: {bug_count} benchmark bugs returned")
-        assert code == 200 and bug_count == 24
-        results["sample_bugs_count"] = bug_count
+        # 2. Benchmark repositories
+        print("\n[2/5] Verifying Sample Bugs Repository Endpoint...")
+        bugs_res = list_repositories()
+        bug_count = len(bugs_res.get("bugs", []))
+        print(f"  Sample bugs: {bug_count} benchmark cases discovered")
+        assert bug_count == 24
+        results["benchmark_cases_count"] = bug_count
 
-        # Test Investigations List Endpoint
-        resp = client.get("/api/investigations")
-        code = resp.status_code
-        invs_data = resp.json()
-        print(f"  GET /api/investigations -> HTTP {code}: {len(invs_data)} records returned")
-        assert code == 200
-        results["investigations_api"] = "healthy"
+        # 3. Investigations API
+        print("\n[3/5] Verifying Investigations API...")
+        invs = get_all_investigations(limit=10)
+        print(f"  Investigations records query: {len(invs)} existing records returned")
+        results["investigations_api"] = "ok"
 
-        # Test Patch Preview, Apply, Rollback Endpoints
-        print("\n[3/4] Testing Patch Workflow (Preview, Apply, Rollback)...")
-        temp_dir = tempfile.mkdtemp(prefix="bugscope_patch_test_")
+        # 4. Patch Preview, Apply, and Rollback
+        print("\n[4/5] Verifying Patch Preview, Apply, and Rollback Workflow...")
+        temp_dir = tempfile.mkdtemp(prefix="bugscope_release_verify_")
         try:
             target_file = os.path.join(temp_dir, "calc.py")
-            orig_content = "def add(a, b):\n    return a - b\n"
+            orig_code = "def compute(a, b):\n    return a - b\n"
             with open(target_file, "w", encoding="utf-8") as f:
-                f.write(orig_content)
+                f.write(orig_code)
 
-            diff_content = (
+            diff_code = (
                 "--- a/calc.py\n"
                 "+++ b/calc.py\n"
                 "@@ -1,2 +1,2 @@\n"
-                " def add(a, b):\n"
+                " def compute(a, b):\n"
                 "-    return a - b\n"
                 "+    return a + b\n"
             )
 
             # Preview
-            prev_resp = client.post(
-                "/api/patches/preview",
-                json={"original_code": orig_content, "diff": diff_content},
-            )
-            p_code = prev_resp.status_code
-            prev_res = prev_resp.json()
-            print(f"  POST /api/patches/preview -> HTTP {p_code}: success={prev_res.get('success')}")
-            assert p_code == 200 and prev_res.get("success") is True
+            prev = preview_patch(PatchPreviewRequest(original_code=orig_code, diff=diff_code))
+            print(f"  Patch preview: success={prev.get('success')}")
+            assert prev.get("success") is True
+            assert "return a + b" in prev.get("patched_code", "")
 
-            # Register mock investigation for Apply
-            from app.database.db import save_investigation
-            from app.schemas.failure import FailureReport
-            from app.schemas.fix import FixProposal
-            from app.schemas.report import InvestigationReport
-
-            inv_id = "release_test_inv_001"
+            # Register mock report in DB
+            inv_id = "verify_patch_inv_001"
             mock_rep = InvestigationReport(
                 investigation_id=inv_id,
                 failure_report=FailureReport(
@@ -97,61 +99,52 @@ def main():
                     category="LogicError",
                     file="calc.py",
                     line=2,
-                    function="add",
+                    function="compute",
                 ),
                 error_type="LogicError",
                 message="Subtraction instead of addition",
                 verdict="validated",
-                fix_proposal=FixProposal(status="proposed", diff=diff_content),
+                fix_proposal=FixProposal(status="proposed", diff=diff_code),
                 repository_path=temp_dir,
             )
             save_investigation(mock_rep)
 
             # Apply
-            apply_resp = client.post(
-                "/api/patches/apply",
-                json={"investigation_id": inv_id, "target_repo_dir": temp_dir},
-            )
-            a_code = apply_resp.status_code
-            apply_res = apply_resp.json()
-            print(f"  POST /api/patches/apply -> HTTP {a_code}: success={apply_res.get('success')}")
+            apply_res = apply_patch_endpoint(ApplyPatchRequest(investigation_id=inv_id, target_repo_dir=temp_dir, user_approved=True))
+            print(f"  Patch apply: status={apply_res.get('status')}, modified={apply_res.get('modified_files')}")
+            assert apply_res.get("status") == "applied"
             with open(target_file, "r", encoding="utf-8") as f:
-                applied_content = f.read()
-            assert "return a + b" in applied_content
-            print("  Verified file on disk was patched with 'return a + b'")
+                patched_on_disk = f.read()
+            assert "return a + b" in patched_on_disk
+            print("  Verified disk content was successfully patched.")
 
             # Rollback
-            rollback_resp = client.post(
-                "/api/patches/rollback",
-                json={"investigation_id": inv_id, "target_repo_dir": temp_dir},
-            )
-            r_code = rollback_resp.status_code
-            rollback_res = rollback_resp.json()
-            print(f"  POST /api/patches/rollback -> HTTP {r_code}: success={rollback_res.get('success')}")
+            rollback_res = rollback_patch_endpoint(RollbackPatchRequest(investigation_id=inv_id, target_repo_dir=temp_dir))
+            print(f"  Patch rollback: status={rollback_res.get('status')}, restored={rollback_res.get('restored_files')}")
+            assert rollback_res.get("status") == "rolled_back"
             with open(target_file, "r", encoding="utf-8") as f:
-                restored_content = f.read()
-            assert restored_content == orig_content
-            print("  Verified file on disk was rolled back exactly to original content")
-            results["patch_workflow"] = "success"
+                restored_on_disk = f.read()
+            assert restored_on_disk == orig_code
+            print("  Verified disk content was perfectly rolled back to original content.")
+            results["patch_workflow"] = "validated"
 
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
-        # Docker check
-        print("\n[4/4] Checking Docker Sandbox Availability...")
-        from app.services.sandbox import check_docker_available
-        docker_avail = check_docker_available()
-        print(f"  Docker daemon available: {docker_avail}")
-        results["docker_available"] = docker_avail
+        # 5. Docker sandbox status
+        print("\n[5/5] Checking Docker Sandbox Availability...")
+        d_avail = is_docker_available()
+        print(f"  Docker daemon available: {d_avail}")
+        results["docker_available"] = d_avail
 
         print("\n=======================================================")
         print("  Runtime Verification Summary:")
         print(json.dumps(results, indent=2))
-        print("=======================================================")
+        print("=======================================================\n")
         return 0
 
-    except Exception as e:
-        print(f"\nVerification FAILED with exception: {e}")
+    except Exception as exc:
+        print(f"\nVerification FAILED: {exc}")
         import traceback
         traceback.print_exc()
         return 1

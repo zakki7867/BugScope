@@ -139,7 +139,20 @@ def test_patch_endpoints_workflow():
         )
         save_investigation(mock_report)
 
-        # Apply
+        # Verify default user_approved=False rejects modification
+        with pytest.raises(Exception) as exc_info:
+            apply_patch_endpoint(
+                ApplyPatchRequest(
+                    investigation_id="test_inv_patch_123",
+                    target_repo_dir=d,
+                )
+            )
+        assert "User approval required" in str(exc_info.value)
+        # Ensure file was not modified
+        with open(sf, "r") as f:
+            assert f.read() == orig_code
+
+        # Apply with explicit approval
         app_res = apply_patch_endpoint(
             ApplyPatchRequest(
                 investigation_id="test_inv_patch_123",

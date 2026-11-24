@@ -1,11 +1,15 @@
 # Environments and secrets
 .env
+.env.*
+!.env.example
 .venv/
 venv/
 __pycache__/
 *.py[cod]
 *$py.class
 *.db
+*.sqlite
+*.sqlite3
 .pytest_cache/
 .coverage
 htmlcov/
@@ -14,3 +18,8 @@ build/
 *.egg-info/
 scratch/
 temp_extracted/
+node_modules/
+.next/
+*.log
+.DS_Store
+Thumbs.db

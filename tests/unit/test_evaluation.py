@@ -102,7 +102,7 @@ def test_format_markdown_table():
     )
 
     table = format_markdown_table(m_bs, m_bl)
-    assert "| Metric | BugScope (Evidence-Checked) | Baseline (Single-Prompt LLM) |" in table
+    assert "| Metric | BugScope (Evidence-Checked) | Modelled Baseline (Synthetic Single-Prompt) |" in table
     assert "Top-1 Root Cause Accuracy" in table
     assert "85.0%" in table
 

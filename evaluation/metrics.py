@@ -121,7 +121,7 @@ def format_markdown_table(
     baseline_metrics: EvaluationMetrics,
 ) -> str:
     """Format side-by-side comparison markdown table."""
-    return f"""| Metric | BugScope (Evidence-Checked) | Baseline (Single-Prompt LLM) |
+    return f"""| Metric | BugScope (Evidence-Checked) | Modelled Baseline (Synthetic Single-Prompt) |
 | :--- | :---: | :---: |
 | **Total Sample Size** | {bugscope_metrics.total_bugs} bugs | {baseline_metrics.total_bugs} bugs |
 | **Top-1 Root Cause Accuracy** | **{bugscope_metrics.top1_root_cause_accuracy * 100:.1f}%** | {baseline_metrics.top1_root_cause_accuracy * 100:.1f}% |

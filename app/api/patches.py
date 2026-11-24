@@ -30,7 +30,7 @@ class ApplyPatchRequest(BaseModel):
     """Payload to apply a verified patch to the user's project."""
     investigation_id: str = Field(..., description="ID of completed investigation")
     target_repo_dir: str = Field(..., description="Path to original project directory")
-    user_approved: bool = Field(..., description="Explicit confirmation that user approves applying the patch")
+    user_approved: bool = Field(default=False, description="Explicit confirmation that user approves applying the patch (defaults to False)")
 
 
 class RollbackPatchRequest(BaseModel):

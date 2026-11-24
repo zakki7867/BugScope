@@ -71,6 +71,7 @@ def serve_dashboard_ui():
 
 # Root health and metadata endpoint
 @app.get("/health")
+@app.get("/api/health")
 def health_check():
     """Health check endpoint."""
     return {
