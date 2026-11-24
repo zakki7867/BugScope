@@ -136,8 +136,55 @@ def parse_unified_diff(diff_text: str) -> Dict[str, List[Tuple[List[str], List[s
     return file_patches
 
 
+DANGEROUS_PATTERNS = [
+    (re.compile(r"\b(eval|exec)\s*\("), "Dynamic code execution (eval/exec) prohibited."),
+    (re.compile(r"\bos\.system\s*\("), "Direct shell command execution (os.system) prohibited."),
+    (re.compile(r"\bsubprocess\.(Popen|call|run|check_call|check_output)\s*\([^)]*shell\s*=\s*True"), "Shell=True subprocess execution prohibited."),
+    (re.compile(r"\bshutil\.rmtree\s*\(\s*['\"]/['\"]"), "Destructive root filesystem operation prohibited."),
+]
+
+
+def validate_patch_safety(diff_text: str) -> None:
+    """Enforce strict patch safety invariants:
+
+    1. Never modify existing test files (prevents making tests pass by altering assertions).
+    2. Path traversal rejection (no .. or escaping repository).
+    3. Rejection of unsafe or dangerous execution constructs (eval, exec, shell=True).
+    """
+    if not diff_text.strip():
+        raise PatchError("Diff text is empty.")
+
+    patches = parse_unified_diff(diff_text)
+    if not patches:
+        raise PatchError("Could not parse any valid hunks from unified diff.")
+
+    for rel_p, hunks in patches.items():
+        clean_p = rel_p.lower().replace("\\", "/")
+
+        # 1. Reject edits to existing test files
+        if "test_" in clean_p or "_test.py" in clean_p or clean_p.startswith("tests/") or "/tests/" in clean_p:
+            raise PatchError(
+                f"Patch safety violation: Patch is not permitted to edit existing test file '{rel_p}'. "
+                "Fixes must resolve issues in application source code, not by altering test assertions."
+            )
+
+        # 2. Reject path traversal
+        if ".." in clean_p.split("/") or clean_p.startswith("/"):
+            raise PatchError(f"Patch safety violation: Path traversal detected in '{rel_p}'.")
+
+        # 3. Check added lines for dangerous operations
+        for _, new_lines in hunks:
+            for line in new_lines:
+                for pattern, reason in DANGEROUS_PATTERNS:
+                    if pattern.search(line):
+                        raise PatchError(f"Patch safety violation in added line '{line.strip()}': {reason}")
+
+
 def apply_patch_to_directory(repo_dir: str, diff_text: str) -> List[str]:
-    """Apply a unified diff patch to files in repo_dir.
+    """Apply a unified diff patch to files in repo_dir with atomic rollback.
+
+    If any hunk fails or an error occurs, all modified files are automatically rolled back
+    to their exact pre-patch state.
 
     Args:
         repo_dir: Absolute path of repository.
@@ -147,27 +194,24 @@ def apply_patch_to_directory(repo_dir: str, diff_text: str) -> List[str]:
         List of modified file relative paths.
 
     Raises:
-        PatchError: If patch cannot be applied cleanly.
+        PatchError: If patch safety check fails or patch cannot be applied cleanly.
     """
-    if not diff_text.strip():
-        raise PatchError("Diff text is empty.")
+    validate_patch_safety(diff_text)
 
     patches = parse_unified_diff(diff_text)
-    if not patches:
-        raise PatchError("Could not parse any valid hunks from unified diff.")
-
-    # Security check: never allow patches to rewrite existing test files
-    for rel_p in patches.keys():
-        clean_p = rel_p.lower()
-        if "test_" in clean_p or "_test.py" in clean_p or "tests/" in clean_p:
-            raise PatchError(f"Patch is not permitted to edit existing test file '{rel_p}'. Fix must modify application code.")
-
     repo_path = Path(repo_dir).resolve()
-    modified_files: List[str] = []
 
-    for rel_path, hunks in patches.items():
+    # Pre-flight: verify and back up all target files before modifying anything
+    backup_contents: Dict[Path, str] = {}
+    resolved_targets: Dict[str, Path] = {}
+
+    for rel_path in patches.keys():
         target_path = (repo_path / rel_path).resolve()
-        # Fallback to search if relative path is slightly mismatched
+        try:
+            target_path.relative_to(repo_path)
+        except ValueError as exc:
+            raise PatchError(f"Target path '{rel_path}' escapes repository boundary.") from exc
+
         if not target_path.is_file():
             candidates = list(repo_path.rglob(Path(rel_path).name))
             if candidates:
@@ -176,46 +220,62 @@ def apply_patch_to_directory(repo_dir: str, diff_text: str) -> List[str]:
                 raise PatchError(f"Target file for patch not found on disk: {rel_path}")
 
         try:
-            content = target_path.read_text(encoding="utf-8", errors="replace")
+            backup_contents[target_path] = target_path.read_text(encoding="utf-8", errors="replace")
+            resolved_targets[rel_path] = target_path
         except Exception as exc:
-            raise PatchError(f"Could not read {target_path}: {exc}") from exc
+            raise PatchError(f"Could not read {target_path} for pre-patch backup: {exc}") from exc
 
-        # Apply each hunk sequentially
-        for old_lines, new_lines in hunks:
-            old_str = "\n".join(old_lines)
-            new_str = "\n".join(new_lines)
+    modified_files: List[str] = []
 
-            # 1. Exact match attempt
-            if old_str in content:
-                content = content.replace(old_str, new_str, 1)
-                continue
+    try:
+        for rel_path, hunks in patches.items():
+            target_path = resolved_targets[rel_path]
+            content = backup_contents[target_path]
 
-            # 2. Whitespace-relaxed match attempt
-            lines = content.splitlines()
-            old_norm = [re.sub(r"\s+", " ", l).strip() for l in old_lines if l.strip()]
-            matched = False
+            # Apply each hunk sequentially
+            for old_lines, new_lines in hunks:
+                old_str = "\n".join(old_lines)
+                new_str = "\n".join(new_lines)
 
-            if old_norm:
-                for idx in range(len(lines) - len(old_norm) + 1):
-                    window = [
-                        re.sub(r"\s+", " ", lines[idx + k]).strip()
-                        for k in range(len(old_norm))
-                    ]
-                    if window == old_norm:
-                        # Replace window
-                        before = lines[:idx]
-                        after = lines[idx + len(old_norm) :]
-                        content = "\n".join(before + new_lines + after)
-                        matched = True
-                        break
+                # 1. Exact match attempt
+                if old_str in content:
+                    content = content.replace(old_str, new_str, 1)
+                    continue
 
-            if not matched:
-                raise PatchError(
-                    f"Hunk target could not be located in {rel_path}:\nOld lines:\n{old_str}"
-                )
+                # 2. Whitespace-relaxed match attempt
+                lines = content.splitlines()
+                old_norm = [re.sub(r"\s+", " ", l).strip() for l in old_lines if l.strip()]
+                matched = False
 
-        target_path.write_text(content, encoding="utf-8")
-        rel_saved = target_path.relative_to(repo_path).as_posix()
-        modified_files.append(rel_saved)
+                if old_norm:
+                    for idx in range(len(lines) - len(old_norm) + 1):
+                        window = [
+                            re.sub(r"\s+", " ", lines[idx + k]).strip()
+                            for k in range(len(old_norm))
+                        ]
+                        if window == old_norm:
+                            before = lines[:idx]
+                            after = lines[idx + len(old_norm) :]
+                            content = "\n".join(before + new_lines + after)
+                            matched = True
+                            break
 
-    return modified_files
+                if not matched:
+                    raise PatchError(
+                        f"Hunk target could not be located in {rel_path}:\nOld lines:\n{old_str}"
+                    )
+
+            target_path.write_text(content, encoding="utf-8")
+            rel_saved = target_path.relative_to(repo_path).as_posix()
+            modified_files.append(rel_saved)
+
+        return modified_files
+
+    except Exception:
+        # Atomic rollback: restore every file to its pre-patch state
+        for t_path, orig_text in backup_contents.items():
+            try:
+                t_path.write_text(orig_text, encoding="utf-8")
+            except Exception:
+                pass
+        raise

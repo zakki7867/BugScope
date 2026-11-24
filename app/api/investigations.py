@@ -85,17 +85,20 @@ def get_investigation_graph_state(investigation_id: str):
     if not report:
         raise HTTPException(status_code=404, detail="Investigation not found.")
 
-    # Nodes in the workflow topology
+    # Nodes in the 13-step workflow topology
     standard_nodes = [
         {"id": "failure_analyzer", "label": "Failure Analyzer", "type": "deterministic"},
         {"id": "repo_investigator", "label": "Repo Investigator", "type": "deterministic"},
+        {"id": "code_context_extractor", "label": "Context Extractor", "type": "deterministic"},
         {"id": "reproducer", "label": "Sandbox Reproducer", "type": "deterministic"},
         {"id": "hypothesis_generator", "label": "Hypothesis Generator", "type": "llm"},
         {"id": "evidence_verifier", "label": "Evidence Verifier", "type": "deterministic"},
+        {"id": "hypothesis_ranker", "label": "Hypothesis Ranker", "type": "deterministic"},
         {"id": "experiment_runner", "label": "Experiment Runner", "type": "deterministic"},
         {"id": "fix_generator", "label": "Fix Generator", "type": "llm"},
-        {"id": "test_generator", "label": "Regression Test Generator", "type": "llm"},
-        {"id": "validator", "label": "Sandbox Validator", "type": "deterministic"},
+        {"id": "patch_safety_checker", "label": "Patch Safety Guard", "type": "deterministic"},
+        {"id": "test_generator", "label": "Test Generator", "type": "llm"},
+        {"id": "validator", "label": "3-Phase Validator", "type": "deterministic"},
         {"id": "report_builder", "label": "Report Builder", "type": "deterministic"},
     ]
 
@@ -121,12 +124,15 @@ def get_investigation_graph_state(investigation_id: str):
 
     edges = [
         {"source": "failure_analyzer", "target": "repo_investigator"},
-        {"source": "repo_investigator", "target": "reproducer"},
+        {"source": "repo_investigator", "target": "code_context_extractor"},
+        {"source": "code_context_extractor", "target": "reproducer"},
         {"source": "reproducer", "target": "hypothesis_generator"},
         {"source": "hypothesis_generator", "target": "evidence_verifier"},
-        {"source": "evidence_verifier", "target": "experiment_runner"},
+        {"source": "evidence_verifier", "target": "hypothesis_ranker"},
+        {"source": "hypothesis_ranker", "target": "experiment_runner"},
         {"source": "experiment_runner", "target": "fix_generator"},
-        {"source": "fix_generator", "target": "test_generator"},
+        {"source": "fix_generator", "target": "patch_safety_checker"},
+        {"source": "patch_safety_checker", "target": "test_generator"},
         {"source": "test_generator", "target": "validator"},
         {"source": "validator", "target": "report_builder"},
     ]

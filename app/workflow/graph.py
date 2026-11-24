@@ -68,8 +68,29 @@ def node_repo_investigator(state: BugScopeState) -> Dict[str, Any]:
     return {"context_bundle": bundle, "traces": traces}
 
 
+def node_code_context_extractor(state: BugScopeState) -> Dict[str, Any]:
+    """Node 3: Deterministic code context extractor."""
+    start_t = time.time()
+    bundle = state.get("context_bundle")
+    snippet_count = len(bundle.snippets) if bundle else 0
+    total_lines = sum(len(s.code.splitlines()) for s in bundle.snippets) if bundle else 0
+    elapsed_ms = round((time.time() - start_t) * 1000, 2)
+
+    trace_entry = {
+        "node": "code_context_extractor",
+        "input_summary": f"{snippet_count} snippets from {bundle.failing_file if bundle else 'unknown'}",
+        "output_summary": f"Extracted {total_lines} lines within token budget",
+        "duration_ms": elapsed_ms,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0,
+    }
+    traces = state.get("traces", []) + [trace_entry]
+    return {"traces": traces}
+
+
 def node_reproducer(state: BugScopeState) -> Dict[str, Any]:
-    """Node 3: Deterministic sandbox reproducer."""
+    """Node 4: Deterministic sandbox reproducer."""
     start_t = time.time()
     repro = reproducer(
         repo_dir=state["repo_dir"],
@@ -92,7 +113,7 @@ def node_reproducer(state: BugScopeState) -> Dict[str, Any]:
 
 
 def node_hypothesis_generator(state: BugScopeState) -> Dict[str, Any]:
-    """Node 4: LLM hypothesis generator."""
+    """Node 5: LLM hypothesis generator."""
     start_t = time.time()
     hypotheses, usage = hypothesis_generator(
         failure_report=state["failure_report"],
@@ -114,7 +135,7 @@ def node_hypothesis_generator(state: BugScopeState) -> Dict[str, Any]:
 
 
 def node_evidence_verifier(state: BugScopeState) -> Dict[str, Any]:
-    """Node 5: Deterministic mechanical evidence verifier."""
+    """Node 6: Deterministic mechanical evidence verifier."""
     start_t = time.time()
     ranked = evidence_verifier(
         repo_dir=state["repo_dir"],
@@ -125,8 +146,8 @@ def node_evidence_verifier(state: BugScopeState) -> Dict[str, Any]:
     top = ranked[0] if ranked else None
     trace_entry = {
         "node": "evidence_verifier",
-        "input_summary": f"Verifying {len(state['hypotheses'])} hypotheses",
-        "output_summary": f"Top hypothesis #{top.id if top else 'none'} score {top.score if top else 0} ({top.label if top else 'none'})",
+        "input_summary": f"Verifying quotes across {len(state['hypotheses'])} hypotheses",
+        "output_summary": f"Mechanical verification complete: top score +{top.score if top else 0}",
         "duration_ms": elapsed_ms,
         "tokens_in": 0,
         "tokens_out": 0,
@@ -140,8 +161,28 @@ def node_evidence_verifier(state: BugScopeState) -> Dict[str, Any]:
     }
 
 
+def node_hypothesis_ranker(state: BugScopeState) -> Dict[str, Any]:
+    """Node 7: Deterministic hypothesis ranker."""
+    start_t = time.time()
+    ranked = state.get("ranked_hypotheses", [])
+    top = state.get("top_hypothesis")
+    elapsed_ms = round((time.time() - start_t) * 1000, 2)
+
+    trace_entry = {
+        "node": "hypothesis_ranker",
+        "input_summary": f"Ranked {len(ranked)} hypotheses by verified evidence score",
+        "output_summary": f"Top #{top.id if top else 'none'}: {top.title if top else 'none'} ({top.label if top else 'none'})",
+        "duration_ms": elapsed_ms,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0,
+    }
+    traces = state.get("traces", []) + [trace_entry]
+    return {"traces": traces}
+
+
 def node_experiment_runner(state: BugScopeState) -> Dict[str, Any]:
-    """Deterministic controlled experiment runner."""
+    """Node 8: Deterministic controlled experiment runner."""
     start_t = time.time()
     results = experiment_runner(
         repo_dir=state["repo_dir"],
@@ -165,7 +206,7 @@ def node_experiment_runner(state: BugScopeState) -> Dict[str, Any]:
 
 
 def node_fix_generator(state: BugScopeState) -> Dict[str, Any]:
-    """Node 6: LLM fix generator."""
+    """Node 9: LLM fix generator."""
     start_t = time.time()
     proposal, usage = fix_generator(
         failure_report=state["failure_report"],
@@ -188,8 +229,47 @@ def node_fix_generator(state: BugScopeState) -> Dict[str, Any]:
     return {"fix_proposal": proposal, "traces": traces}
 
 
+def node_patch_safety_checker(state: BugScopeState) -> Dict[str, Any]:
+    """Node 10: Deterministic patch safety checker."""
+    start_t = time.time()
+    proposal = state.get("fix_proposal")
+    is_safe = True
+    error_msg = None
+
+    if proposal and proposal.diff.strip():
+        try:
+            from app.services.patcher import validate_patch_safety
+            validate_patch_safety(proposal.diff)
+        except Exception as exc:
+            is_safe = False
+            error_msg = str(exc)
+            proposal = proposal.model_copy(
+                update={
+                    "status": "needs_human_decision",
+                    "human_decision_reason": f"Patch safety invariant violated: {error_msg}",
+                    "options_if_ambiguous": [
+                        "Review proposed diff manually for forbidden test edits or unsafe code execution.",
+                        "Reject automated patch and inspect alternative hypotheses.",
+                    ],
+                }
+            )
+
+    elapsed_ms = round((time.time() - start_t) * 1000, 2)
+    trace_entry = {
+        "node": "patch_safety_checker",
+        "input_summary": f"Diff length {len(proposal.diff) if proposal else 0} chars",
+        "output_summary": "Passed all safety invariants" if is_safe else f"Rejected: {error_msg}",
+        "duration_ms": elapsed_ms,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "cost_usd": 0.0,
+    }
+    traces = state.get("traces", []) + [trace_entry]
+    return {"fix_proposal": proposal, "traces": traces}
+
+
 def node_test_generator(state: BugScopeState) -> Dict[str, Any]:
-    """Node 7: LLM test generator."""
+    """Node 11: LLM test generator."""
     start_t = time.time()
     reg_test, usage = test_generator(
         failure_report=state["failure_report"],
@@ -213,7 +293,7 @@ def node_test_generator(state: BugScopeState) -> Dict[str, Any]:
 
 
 def node_validator(state: BugScopeState) -> Dict[str, Any]:
-    """Node 8: Deterministic sandbox validator."""
+    """Node 12: Deterministic sandbox validator."""
     start_t = time.time()
     current_retries = state.get("retries_used", 0)
     val_report = validator(
@@ -276,14 +356,17 @@ def create_bugscope_graph() -> StateGraph:
     """Build and compile the BugScope LangGraph workflow."""
     workflow = StateGraph(BugScopeState)
 
-    # Register nodes
+    # Register all 13 workflow nodes
     workflow.add_node("failure_analyzer", node_failure_analyzer)
     workflow.add_node("repo_investigator", node_repo_investigator)
+    workflow.add_node("code_context_extractor", node_code_context_extractor)
     workflow.add_node("reproducer", node_reproducer)
     workflow.add_node("hypothesis_generator", node_hypothesis_generator)
     workflow.add_node("evidence_verifier", node_evidence_verifier)
+    workflow.add_node("hypothesis_ranker", node_hypothesis_ranker)
     workflow.add_node("experiment_runner", node_experiment_runner)
     workflow.add_node("fix_generator", node_fix_generator)
+    workflow.add_node("patch_safety_checker", node_patch_safety_checker)
     workflow.add_node("test_generator", node_test_generator)
     workflow.add_node("validator", node_validator)
     workflow.add_node("report_builder", node_report_builder)
@@ -291,10 +374,12 @@ def create_bugscope_graph() -> StateGraph:
     # Linear deterministic chain
     workflow.set_entry_point("failure_analyzer")
     workflow.add_edge("failure_analyzer", "repo_investigator")
-    workflow.add_edge("repo_investigator", "reproducer")
+    workflow.add_edge("repo_investigator", "code_context_extractor")
+    workflow.add_edge("code_context_extractor", "reproducer")
     workflow.add_edge("reproducer", "hypothesis_generator")
     workflow.add_edge("hypothesis_generator", "evidence_verifier")
-    workflow.add_edge("evidence_verifier", "experiment_runner")
+    workflow.add_edge("evidence_verifier", "hypothesis_ranker")
+    workflow.add_edge("hypothesis_ranker", "experiment_runner")
 
     # Conditional routing after experiment runner
     workflow.add_conditional_edges(
@@ -303,9 +388,12 @@ def create_bugscope_graph() -> StateGraph:
         {"fix_generator": "fix_generator", "report_builder": "report_builder"},
     )
 
-    # Conditional routing after fix generation
+    # Fix generator leads directly to patch safety checker
+    workflow.add_edge("fix_generator", "patch_safety_checker")
+
+    # Conditional routing after patch safety verification
     workflow.add_conditional_edges(
-        "fix_generator",
+        "patch_safety_checker",
         route_after_fix,
         {"test_generator": "test_generator", "report_builder": "report_builder"},
     )

@@ -25,8 +25,8 @@ def list_benchmarks():
                         gt_data = json.loads(gt_file.read_text(encoding="utf-8"))
                         cases.append({
                             "bug_id": bug_folder.name,
-                            "category": gt_data.get("category", "General"),
-                            "description": gt_data.get("description", bug_folder.name),
+                            "category": gt_data.get("root_cause_category") or gt_data.get("category", "General"),
+                            "description": gt_data.get("notes") or gt_data.get("description", bug_folder.name),
                             "failing_test": gt_data.get("failing_test", ""),
                             "is_upstream": gt_data.get("is_upstream", False),
                             "is_ambiguous": gt_data.get("is_ambiguous", False),

@@ -1,7 +1,7 @@
 """Schemas for 3-phase sandbox validation and final verdicts."""
 
 from typing import List, Literal, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 VerdictType = Literal[
     "validated",
@@ -9,6 +9,8 @@ VerdictType = Literal[
     "not_validated",
     "could_not_reproduce",
     "needs_human_decision",
+    "sandbox_unavailable",
+    "analysis_only",
 ]
 
 
@@ -38,3 +40,29 @@ class ValidationReport(BaseModel):
     failure_log: Optional[str] = Field(
         default=None, description="Diagnostic test error output if validation failed"
     )
+
+    # Computed fields for frontend API serialization and backwards compatibility
+    @computed_field
+    @property
+    def reproduced_before(self) -> bool:
+        """Alias for regression_fails_before."""
+        return self.regression_fails_before
+
+    @computed_field
+    @property
+    def patch_applies(self) -> bool:
+        """Whether the patch was cleanly applied and tested."""
+        return self.regression_passes_after or (self.verdict == "validated")
+
+    @computed_field
+    @property
+    def existing_suite_passes_after(self) -> bool:
+        """Whether the existing suite passed without new regressions."""
+        return self.existing_suite_result == "passed"
+
+    @computed_field
+    @property
+    def retries_attempted(self) -> int:
+        """Alias for retries_used."""
+        return self.retries_used
+

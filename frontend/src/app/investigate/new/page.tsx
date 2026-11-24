@@ -12,6 +12,8 @@ export default function NewInvestigation() {
   const [testCommand, setTestCommand] = useState("");
   const [repositories, setRepositories] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadingZip, setUploadingZip] = useState(false);
+  const [uploadedZipName, setUploadedZipName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -22,12 +24,49 @@ export default function NewInvestigation() {
 
   const handleSelectBug = (bug: any) => {
     setRepoDir(bug.path);
+    setUploadedZipName(null);
     // Auto-fill a representative stack trace for benchmark bug
     setRawTrace(`Traceback (most recent call last):
   File "tests/test_main.py", line 14, in test_failure
     assert run_target() == expected
 AssertionError: Bug triggered in ${bug.name}`);
     setTestCommand(`pytest ${bug.path}/tests/`);
+  };
+
+  const handleZipUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".zip")) {
+      setError("Please select a valid .zip archive.");
+      return;
+    }
+
+    try {
+      setUploadingZip(true);
+      setError(null);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+      const res = await fetch(`${API_BASE}/repositories/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+        throw new Error(err.detail || "Failed to upload and extract ZIP.");
+      }
+
+      const data = await res.json();
+      setRepoDir(data.repository_path);
+      setUploadedZipName(`${file.name} (${data.total_files} files safely extracted)`);
+    } catch (err: any) {
+      setError(err.message || "Failed to process ZIP upload.");
+    } finally {
+      setUploadingZip(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +151,31 @@ AssertionError: Bug triggered in ${bug.name}`);
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-bold text-white mb-2">
-              Repository Directory Path (Optional)
+              Upload Project ZIP Archive (Optional)
+            </label>
+            <div className="relative border-2 border-dashed border-border hover:border-blue-500 rounded-lg p-3 bg-slate-950 transition flex flex-col items-center justify-center text-center cursor-pointer">
+              <input
+                type="file"
+                accept=".zip"
+                onChange={handleZipUpload}
+                disabled={uploadingZip}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              />
+              <Upload className="w-5 h-5 text-blue-400 mb-1" />
+              <span className="text-xs font-semibold text-white">
+                {uploadingZip
+                  ? "Extracting ZIP Safely..."
+                  : uploadedZipName
+                  ? uploadedZipName
+                  : "Click or drag .zip archive here"}
+              </span>
+              <span className="text-[11px] text-gray-500 mt-0.5">Zip Slip & symlink protection enforced</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-white mb-2">
+              Repository Directory Path (Auto-filled on ZIP)
             </label>
             <input
               type="text"
@@ -122,19 +185,19 @@ AssertionError: Bug triggered in ${bug.name}`);
               className="w-full rounded-lg border border-border bg-slate-950 px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition"
             />
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-bold text-white mb-2">
-              Failing Test Command (Optional)
-            </label>
-            <input
-              type="text"
-              value={testCommand}
-              onChange={(e) => setTestCommand(e.target.value)}
-              placeholder="e.g. pytest tests/test_user.py"
-              className="w-full rounded-lg border border-border bg-slate-950 px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-bold text-white mb-2">
+            Failing Test Command (Optional)
+          </label>
+          <input
+            type="text"
+            value={testCommand}
+            onChange={(e) => setTestCommand(e.target.value)}
+            placeholder="e.g. pytest tests/test_user.py"
+            className="w-full rounded-lg border border-border bg-slate-950 px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition"
+          />
         </div>
 
         <div className="pt-4 border-t border-border flex items-center justify-between">

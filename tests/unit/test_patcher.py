@@ -72,3 +72,55 @@ def test_apply_patch_invalid_target_file(target_repo):
     with pytest.raises(PatchError) as exc_info:
         apply_patch_to_directory(str(target_repo), diff)
     assert "not found" in str(exc_info.value).lower()
+
+
+def test_patch_safety_rejects_modifying_tests(target_repo):
+    """Test PatchError raised if diff attempts to rewrite existing test files."""
+    diff = """
+--- a/tests/test_pricing.py
++++ b/tests/test_pricing.py
+@@ -1,1 +1,1 @@
+-assert False
++assert True
+"""
+    with pytest.raises(PatchError) as exc_info:
+        apply_patch_to_directory(str(target_repo), diff)
+    assert "not permitted to edit existing test file" in str(exc_info.value).lower()
+
+
+def test_patch_safety_rejects_dangerous_eval(target_repo):
+    """Test PatchError raised if patch adds dangerous code execution."""
+    diff = """
+--- a/app/pricing.py
++++ b/app/pricing.py
+@@ -1,2 +1,3 @@
+ def calc_discount(price, rate):
++    eval(rate)
+     return price * (1 - rate)
+"""
+    with pytest.raises(PatchError) as exc_info:
+        apply_patch_to_directory(str(target_repo), diff)
+    assert "prohibited" in str(exc_info.value).lower()
+
+
+def test_apply_patch_atomic_rollback_on_failure(target_repo):
+    """Test atomic rollback: if any hunk fails, target files are reverted to pre-patch content."""
+    original_text = (target_repo / "app" / "pricing.py").read_text(encoding="utf-8")
+    # Diff with first hunk that matches, but second hunk that fails
+    diff = """
+--- a/app/pricing.py
++++ b/app/pricing.py
+@@ -1,2 +1,2 @@
+ def calc_discount(price, rate):
+-    return price * (1 - rate)
++    return price * (1 - float(rate))
+@@ -10,1 +10,1 @@
+-nonexistent_symbol = 123
++new_symbol = 456
+"""
+    with pytest.raises(PatchError):
+        apply_patch_to_directory(str(target_repo), diff)
+
+    # Content must be completely reverted back to original
+    current_text = (target_repo / "app" / "pricing.py").read_text(encoding="utf-8")
+    assert current_text == original_text

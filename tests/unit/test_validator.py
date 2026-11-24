@@ -113,3 +113,23 @@ def test_validator_phase1_does_not_fail(dummy_project):
     assert report.verdict == "not_validated"
     assert report.regression_fails_before is False
     assert "passed on original" in report.limitations[0]
+
+
+def test_validator_docker_unavailable_returns_sandbox_unavailable(dummy_project):
+    """Test validator reports sandbox_unavailable when Docker daemon is not accessible."""
+    mock_client = MagicMock()
+    mock_client.ping.side_effect = Exception("Docker daemon is unreachable")
+
+    proposal = FixProposal(status="proposed", diff="some diff")
+    reg_test = RegressionTest(test_code="def test_sample(): pass")
+
+    report = validator(
+        str(dummy_project),
+        proposal,
+        reg_test,
+        custom_docker_client=mock_client,
+    )
+
+    assert report.verdict == "sandbox_unavailable"
+    assert report.regression_fails_before is False
+    assert "sandbox execution refused" in report.limitations[0].lower()

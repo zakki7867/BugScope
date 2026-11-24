@@ -1,0 +1,25 @@
+# BugScope Disposable Execution Sandbox
+# Hardened container environment for untrusted Python code execution
+
+FROM python:3.11-slim
+
+# Prevent interactive prompts and disable Python bytecode caching
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Create unprivileged sandbox user with fixed UID/GID
+RUN groupadd -g 1000 sandbox && \
+    useradd -u 1000 -g sandbox -m -s /bin/sh sandbox
+
+# Install essential testing packages in the image so network is never needed at runtime
+RUN pip install --no-cache-dir pytest
+
+# Create mount points with proper permissions
+RUN mkdir -p /app /scratch && \
+    chown -R sandbox:sandbox /scratch
+
+WORKDIR /scratch
+USER sandbox
+
+CMD ["python", "-m", "pytest", "-v"]

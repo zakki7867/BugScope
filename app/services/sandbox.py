@@ -91,6 +91,19 @@ def run_command_in_sandbox(
                 docker_available=False,
                 error="Docker daemon is unavailable. Untrusted code execution refused for safety.",
             )
+    else:
+        try:
+            client.ping()
+        except Exception as exc:
+            logger.warning("Injected Docker client failed ping: %s", exc)
+            return SandboxExecutionResult(
+                exit_code=-1,
+                stdout="",
+                stderr="",
+                duration_seconds=0.0,
+                docker_available=False,
+                error="Docker daemon is unavailable. Untrusted code execution refused for safety.",
+            )
 
     proj_path = Path(project_dir).resolve()
     # Create isolated scratch directory on host for writable artifacts
@@ -114,15 +127,28 @@ def run_command_in_sandbox(
             scratch_dir: {"bind": "/scratch", "mode": "rw"},
         }
 
-        # Run ephemeral container
+        # Determine container image: use configured sandbox image or fallback
+        image_name = settings.docker_image or "python:3.11-slim"
+        try:
+            client.images.get(image_name)
+        except Exception:
+            # Fall back to standard python:3.11-slim if custom tag is not built locally
+            image_name = "python:3.11-slim"
+
+        # Run hardened ephemeral container
         container = client.containers.run(
-            image="python:3.11-slim",
+            image=image_name,
             command=container_cmd,
             volumes=volumes,
             working_dir="/scratch",
             network_mode="none",
             mem_limit=settings.memory_limit,
             nano_cpus=int(float(settings.cpu_limit) * 1e9),
+            pids_limit=settings.pids_limit,
+            privileged=False,
+            user="1000:1000",
+            security_opt=["no-new-privileges:true"],
+            cap_drop=["ALL"],
             detach=True,
         )
 

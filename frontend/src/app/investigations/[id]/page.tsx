@@ -20,6 +20,8 @@ import {
   Download,
   AlertCircle,
   FlaskConical,
+  CheckCircle,
+  RefreshCw,
 } from "lucide-react";
 
 export default function InvestigationDetails() {
@@ -29,6 +31,60 @@ export default function InvestigationDetails() {
   const [activeTab, setActiveTab] = useState<"graph" | "hypotheses" | "experiments" | "patch" | "validation" | "traces">("graph");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [applyingPatch, setApplyingPatch] = useState(false);
+  const [patchApplied, setPatchApplied] = useState(false);
+  const [patchActionMsg, setPatchActionMsg] = useState<string | null>(null);
+
+  const handleApplyPatch = async () => {
+    try {
+      setApplyingPatch(true);
+      setPatchActionMsg(null);
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+      const targetDir = report?.failure_report?.file?.includes("/") ? report.failure_report.file.split("/")[0] : ".";
+      const res = await fetch(`${API_BASE}/patches/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          investigation_id: id,
+          target_repo_dir: targetDir,
+          user_approved: true,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to apply patch.");
+      setPatchApplied(true);
+      setPatchActionMsg(data.message);
+    } catch (err: any) {
+      setPatchActionMsg(`Error: ${err.message}`);
+    } finally {
+      setApplyingPatch(false);
+    }
+  };
+
+  const handleRollbackPatch = async () => {
+    try {
+      setApplyingPatch(true);
+      setPatchActionMsg(null);
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+      const targetDir = report?.failure_report?.file?.includes("/") ? report.failure_report.file.split("/")[0] : ".";
+      const res = await fetch(`${API_BASE}/patches/rollback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          investigation_id: id,
+          target_repo_dir: targetDir,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to rollback patch.");
+      setPatchApplied(false);
+      setPatchActionMsg(data.message);
+    } catch (err: any) {
+      setPatchActionMsg(`Error: ${err.message}`);
+    } finally {
+      setApplyingPatch(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -243,6 +299,46 @@ export default function InvestigationDetails() {
                 language="diff"
                 filename={report.failure_report.file}
               />
+
+              {/* User Approval & Rollback Action Controls */}
+              <div className="mt-4 p-4 rounded-xl border border-border bg-surfaceLight/60 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="text-sm font-bold text-white flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    Patch Application Control (User Approval Required)
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Atomic application with pre-patch file backups and instant rollback protection.
+                  </p>
+                  {patchActionMsg && (
+                    <div className="text-xs font-semibold text-blue-400 mt-2 font-mono">
+                      {patchActionMsg}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {!patchApplied ? (
+                    <button
+                      onClick={handleApplyPatch}
+                      disabled={applyingPatch}
+                      className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30 flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      {applyingPatch ? "Applying..." : "Approve & Apply Patch"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleRollbackPatch}
+                      disabled={applyingPatch}
+                      className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-lg shadow-amber-600/30 flex items-center gap-2 disabled:opacity-50"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      {applyingPatch ? "Reverting..." : "Rollback Applied Patch"}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="p-12 text-center text-gray-400 border border-border rounded-xl">

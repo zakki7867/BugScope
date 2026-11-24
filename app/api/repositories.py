@@ -69,8 +69,8 @@ def list_repositories():
                 if gt_path.is_file():
                     try:
                         data = json.loads(gt_path.read_text(encoding="utf-8"))
-                        category = data.get("category", "General")
-                        description = data.get("description", bug_dir.name)
+                        category = data.get("root_cause_category") or data.get("category", "General")
+                        description = data.get("notes") or data.get("description", bug_dir.name)
                     except Exception:
                         pass
                 available.append({

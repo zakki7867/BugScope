@@ -83,3 +83,59 @@ def test_list_investigations(test_db_path, sample_report):
     assert items[0]["id"] == "test-uuid-12345"
     assert items[0]["verdict"] == "validated"
     assert items[0]["error_type"] == "KeyError"
+
+
+def test_save_report_with_validation_and_patch(test_db_path, sample_report):
+    """Test saving a full report with fix proposal, validation result, and hypotheses."""
+    from app.schemas.fix import FixProposal
+    from app.schemas.validation import ValidationReport
+    from app.schemas.hypothesis import Hypothesis, EvidenceItem
+
+    sample_report.hypotheses = [
+        Hypothesis(
+            id=1,
+            title="Fix missing key",
+            explanation="Use get() with default",
+            evidence=[
+                EvidenceItem(
+                    file="app/main.py",
+                    line_start=42,
+                    line_end=42,
+                    quote="user_id = data['user_id']",
+                    stance="supports",
+                    reason="Direct key access",
+                    verified=True,
+                )
+            ],
+            score=1,
+            label="supported",
+            rank=1,
+        )
+    ]
+    sample_report.top_hypothesis = sample_report.hypotheses[0]
+    sample_report.fix_proposal = FixProposal(
+        status="proposed",
+        diff="--- a/app/main.py\n+++ b/app/main.py\n@@ -42,1 +42,1 @@\n-data['user_id']\n+data.get('user_id')\n",
+        explanation="Safely look up user_id",
+    )
+    sample_report.validation_report = ValidationReport(
+        regression_fails_before=True,
+        regression_passes_after=True,
+        existing_suite_result="passed",
+        verdict="validated",
+        retries_used=0,
+        duration_seconds=1.2,
+    )
+
+    saved_id = save_investigation(sample_report, db_path=test_db_path)
+    assert saved_id == sample_report.investigation_id
+
+    retrieved = get_investigation(saved_id, db_path=test_db_path)
+    assert retrieved is not None
+    assert retrieved.fix_proposal is not None
+    assert retrieved.fix_proposal.explanation == "Safely look up user_id"
+    assert retrieved.validation_report is not None
+    assert retrieved.validation_report.regression_fails_before is True
+    assert retrieved.validation_report.regression_passes_after is True
+    assert retrieved.validation_report.reproduced_before is True
+    assert retrieved.validation_report.existing_suite_passes_after is True

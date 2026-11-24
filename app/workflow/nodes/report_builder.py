@@ -84,7 +84,7 @@ def report_builder(state: BugScopeState, db_path: str = None) -> Dict[str, Any]:
     try:
         save_investigation(report, db_path=db_path)
     except Exception as e:
-        # Avoid crashing workflow if database write fails
-        pass
+        import logging
+        logging.getLogger(__name__).error("Failed to persist investigation %s to database: %s", investigation_id, e)
 
     return {"investigation_report": report, "verdict": verdict}

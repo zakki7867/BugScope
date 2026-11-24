@@ -51,6 +51,12 @@ class Settings(BaseModel):
     docker_timeout: int = Field(
         default_factory=lambda: int(os.getenv("BUGSCOPE_DOCKER_TIMEOUT", "30"))
     )
+    docker_image: str = Field(
+        default_factory=lambda: os.getenv("BUGSCOPE_DOCKER_IMAGE", "bugscope-sandbox:latest")
+    )
+    pids_limit: int = Field(
+        default_factory=lambda: int(os.getenv("BUGSCOPE_PIDS_LIMIT", "64"))
+    )
     memory_limit: str = Field(
         default_factory=lambda: os.getenv("BUGSCOPE_MEMORY_LIMIT", "512m")
     )

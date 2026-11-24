@@ -14,12 +14,17 @@ def test_create_bugscope_graph_compilation():
     expected_nodes = [
         "failure_analyzer",
         "repo_investigator",
+        "code_context_extractor",
         "reproducer",
         "hypothesis_generator",
         "evidence_verifier",
+        "hypothesis_ranker",
+        "experiment_runner",
         "fix_generator",
+        "patch_safety_checker",
         "test_generator",
         "validator",
+        "report_builder",
     ]
     for n in expected_nodes:
         assert n in nodes

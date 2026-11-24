@@ -105,9 +105,9 @@ def validator(
                 existing_suite_result="not_run",
                 retries_used=current_retries,
                 duration_seconds=round(time.time() - start_time, 2),
-                limitations=["Docker unavailable. Sandbox execution refused for security."],
-                verdict="could_not_reproduce",
-                failure_log=res_phase1.error,
+                limitations=["Docker daemon unavailable. Sandbox execution refused for host security."],
+                verdict="sandbox_unavailable",
+                failure_log=res_phase1.error or "Sandbox unavailable.",
             )
 
         # Must exit with non-zero status to prove failure

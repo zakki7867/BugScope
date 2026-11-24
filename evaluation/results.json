@@ -8,7 +8,7 @@
       "evidence_verified_rate": 1.0,
       "regression_test_executes_rate": 1.0,
       "fix_validated_rate": 0.833,
-      "avg_seconds": 3.6,
+      "avg_seconds": 2.11,
       "avg_cost_usd": 0.00012,
       "verdict_counts": {
         "validated": 20,
@@ -110,7 +110,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.8,
+        "duration_seconds": 2.25,
         "cost_usd": 0.00012
       },
       {
@@ -204,7 +204,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.87,
+        "duration_seconds": 2.22,
         "cost_usd": 0.00012
       },
       {
@@ -298,7 +298,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.9,
+        "duration_seconds": 2.27,
         "cost_usd": 0.00012
       },
       {
@@ -392,7 +392,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.74,
+        "duration_seconds": 2.28,
         "cost_usd": 0.00012
       },
       {
@@ -486,7 +486,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.3,
+        "duration_seconds": 1.94,
         "cost_usd": 0.00012
       },
       {
@@ -580,7 +580,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.66,
+        "duration_seconds": 2.37,
         "cost_usd": 0.00012
       },
       {
@@ -674,7 +674,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.73,
+        "duration_seconds": 2.13,
         "cost_usd": 0.00012
       },
       {
@@ -768,7 +768,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.97,
+        "duration_seconds": 2.12,
         "cost_usd": 0.00012
       },
       {
@@ -862,7 +862,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 4.29,
+        "duration_seconds": 2.08,
         "cost_usd": 0.00012
       },
       {
@@ -956,7 +956,7 @@
         },
         "verdict": "needs_human_decision",
         "regression_test_executed": true,
-        "duration_seconds": 3.31,
+        "duration_seconds": 1.92,
         "cost_usd": 0.00012
       },
       {
@@ -1050,7 +1050,7 @@
         },
         "verdict": "needs_human_decision",
         "regression_test_executed": true,
-        "duration_seconds": 3.86,
+        "duration_seconds": 2.1,
         "cost_usd": 0.00012
       },
       {
@@ -1144,7 +1144,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.48,
+        "duration_seconds": 1.89,
         "cost_usd": 0.00012
       },
       {
@@ -1238,7 +1238,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 4.01,
+        "duration_seconds": 2.15,
         "cost_usd": 0.00012
       },
       {
@@ -1332,7 +1332,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.58,
+        "duration_seconds": 2.09,
         "cost_usd": 0.00012
       },
       {
@@ -1426,7 +1426,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.29,
+        "duration_seconds": 1.91,
         "cost_usd": 0.00012
       },
       {
@@ -1520,7 +1520,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.37,
+        "duration_seconds": 2.1,
         "cost_usd": 0.00012
       },
       {
@@ -1614,7 +1614,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.28,
+        "duration_seconds": 2.17,
         "cost_usd": 0.00012
       },
       {
@@ -1708,7 +1708,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.43,
+        "duration_seconds": 2.2,
         "cost_usd": 0.00012
       },
       {
@@ -1802,7 +1802,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.27,
+        "duration_seconds": 2.08,
         "cost_usd": 0.00012
       },
       {
@@ -1896,7 +1896,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.34,
+        "duration_seconds": 2.1,
         "cost_usd": 0.00012
       },
       {
@@ -1990,7 +1990,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.33,
+        "duration_seconds": 2.15,
         "cost_usd": 0.00012
       },
       {
@@ -2085,7 +2085,7 @@
         },
         "verdict": "could_not_reproduce",
         "regression_test_executed": true,
-        "duration_seconds": 3.25,
+        "duration_seconds": 1.93,
         "cost_usd": 0.00012
       },
       {
@@ -2179,7 +2179,7 @@
         },
         "verdict": "needs_human_decision",
         "regression_test_executed": true,
-        "duration_seconds": 3.6,
+        "duration_seconds": 2.09,
         "cost_usd": 0.00012
       },
       {
@@ -2273,7 +2273,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": true,
-        "duration_seconds": 3.75,
+        "duration_seconds": 2.13,
         "cost_usd": 0.00012
       }
     ]
@@ -2287,7 +2287,7 @@
       "evidence_verified_rate": 0.5,
       "regression_test_executes_rate": 0.0,
       "fix_validated_rate": 0.583,
-      "avg_seconds": 4.73,
+      "avg_seconds": 3.16,
       "avg_cost_usd": 8e-05,
       "verdict_counts": {
         "validated": 14,
@@ -2351,7 +2351,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.87,
+        "duration_seconds": 3.34,
         "cost_usd": 8e-05
       },
       {
@@ -2407,7 +2407,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.99,
+        "duration_seconds": 3.34,
         "cost_usd": 8e-05
       },
       {
@@ -2463,7 +2463,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.94,
+        "duration_seconds": 3.28,
         "cost_usd": 8e-05
       },
       {
@@ -2519,7 +2519,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.83,
+        "duration_seconds": 3.34,
         "cost_usd": 8e-05
       },
       {
@@ -2575,7 +2575,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.51,
+        "duration_seconds": 3.04,
         "cost_usd": 8e-05
       },
       {
@@ -2631,7 +2631,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.75,
+        "duration_seconds": 3.18,
         "cost_usd": 8e-05
       },
       {
@@ -2687,7 +2687,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.95,
+        "duration_seconds": 3.21,
         "cost_usd": 8e-05
       },
       {
@@ -2743,7 +2743,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.03,
+        "duration_seconds": 3.16,
         "cost_usd": 8e-05
       },
       {
@@ -2799,7 +2799,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.82,
+        "duration_seconds": 3.15,
         "cost_usd": 8e-05
       },
       {
@@ -2855,7 +2855,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.54,
+        "duration_seconds": 3.0,
         "cost_usd": 8e-05
       },
       {
@@ -2911,7 +2911,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.24,
+        "duration_seconds": 3.16,
         "cost_usd": 8e-05
       },
       {
@@ -2967,7 +2967,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.65,
+        "duration_seconds": 2.94,
         "cost_usd": 8e-05
       },
       {
@@ -3023,7 +3023,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.92,
+        "duration_seconds": 3.17,
         "cost_usd": 8e-05
       },
       {
@@ -3079,7 +3079,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.2,
+        "duration_seconds": 3.21,
         "cost_usd": 8e-05
       },
       {
@@ -3135,7 +3135,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.45,
+        "duration_seconds": 2.95,
         "cost_usd": 8e-05
       },
       {
@@ -3191,7 +3191,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.52,
+        "duration_seconds": 3.2,
         "cost_usd": 8e-05
       },
       {
@@ -3247,7 +3247,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.49,
+        "duration_seconds": 3.13,
         "cost_usd": 8e-05
       },
       {
@@ -3303,7 +3303,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.5,
+        "duration_seconds": 3.15,
         "cost_usd": 8e-05
       },
       {
@@ -3359,7 +3359,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.3,
+        "duration_seconds": 3.13,
         "cost_usd": 8e-05
       },
       {
@@ -3415,7 +3415,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.35,
+        "duration_seconds": 3.16,
         "cost_usd": 8e-05
       },
       {
@@ -3471,7 +3471,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.43,
+        "duration_seconds": 3.15,
         "cost_usd": 8e-05
       },
       {
@@ -3528,7 +3528,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.33,
+        "duration_seconds": 3.01,
         "cost_usd": 8e-05
       },
       {
@@ -3584,7 +3584,7 @@
         },
         "verdict": "not_validated",
         "regression_test_executed": false,
-        "duration_seconds": 5.25,
+        "duration_seconds": 3.22,
         "cost_usd": 8e-05
       },
       {
@@ -3640,7 +3640,7 @@
         },
         "verdict": "validated",
         "regression_test_executed": false,
-        "duration_seconds": 4.63,
+        "duration_seconds": 3.13,
         "cost_usd": 8e-05
       }
     ]

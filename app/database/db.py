@@ -36,9 +36,50 @@ def _get_engine_and_session(db_path: Optional[str] = None):
 
 
 def init_db(db_path: Optional[str] = None) -> None:
-    """Initialize database tables using SQLAlchemy Base metadata."""
+    """Initialize database tables using SQLAlchemy Base metadata and run light migrations."""
     eng, _ = _get_engine_and_session(db_path)
     Base.metadata.create_all(bind=eng)
+
+    # Safe lightweight schema migration for existing SQLite databases
+    from sqlalchemy import text
+    try:
+        with eng.connect() as conn:
+            res = conn.execute(text("PRAGMA table_info(investigations)"))
+            cols = {row[1] for row in res.fetchall()}
+            if cols:
+                alter_map = [
+                    ("repository_name", "VARCHAR(256) DEFAULT 'unknown'"),
+                    ("repository_path", "VARCHAR(512) DEFAULT ''"),
+                    ("error_message", "TEXT"),
+                    ("stack_trace", "TEXT"),
+                    ("status", "VARCHAR(64) DEFAULT 'COMPLETED'"),
+                    ("summary", "TEXT"),
+                    ("root_cause_summary", "TEXT"),
+                    ("updated_at", "DATETIME"),
+                ]
+                for col_name, col_type in alter_map:
+                    if col_name not in cols:
+                        conn.execute(text(f"ALTER TABLE investigations ADD COLUMN {col_name} {col_type}"))
+
+            # Ensure traces table matches SQLAlchemy TraceLog schema (VARCHAR id, not legacy INTEGER)
+            res_tr = conn.execute(text("PRAGMA table_info(traces)"))
+            tr_info = {row[1]: row[2].upper() for row in res_tr.fetchall()}
+            if tr_info.get("id") == "INTEGER":
+                conn.execute(text("DROP TABLE traces"))
+                conn.commit()
+                Base.metadata.tables["traces"].create(bind=eng)
+            elif "created_at" not in tr_info:
+                conn.execute(text("ALTER TABLE traces ADD COLUMN created_at DATETIME"))
+                conn.commit()
+
+            # Clean legacy trailing 'Z' in datetimes for Python 3.10 datetime.fromisoformat compatibility
+            try:
+                conn.execute(text("UPDATE investigations SET created_at = REPLACE(created_at, 'Z', '') WHERE created_at LIKE '%Z'"))
+                conn.commit()
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 
 def save_investigation(
@@ -61,8 +102,11 @@ def save_investigation(
 
         inv.repository_name = Path(report.failure_report.file).parts[0] if report.failure_report.file else "unknown"
         inv.repository_path = report.failure_report.file or ""
+        inv.file = report.failure_report.file or ""
+        inv.line = float(report.failure_report.line or 0)
         inv.error_type = report.failure_report.error_type
         inv.error_message = report.failure_report.message
+        inv.message = report.failure_report.message
         inv.stack_trace = getattr(report.failure_report, "raw_traceback", None) or ""
         inv.status = "COMPLETED"
         inv.verdict = report.verdict

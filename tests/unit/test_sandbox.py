@@ -62,7 +62,11 @@ def test_run_command_with_mock_container(tmp_path):
     _, kwargs = mock_client.containers.run.call_args
     assert kwargs["network_mode"] == "none"
     assert kwargs["mem_limit"] == "512m"
-    assert kwargs["image"] == "python:3.11-slim"
+    assert kwargs["image"] in ("bugscope-sandbox:latest", "python:3.11-slim")
+    assert kwargs["pids_limit"] == 64
+    assert kwargs["security_opt"] == ["no-new-privileges:true"]
+    assert kwargs["cap_drop"] == ["ALL"]
+    assert kwargs["user"] == "1000:1000"
     # Verify original project is mounted read-only
     volumes = kwargs["volumes"]
     assert str(tmp_path) in volumes
