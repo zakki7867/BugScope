@@ -6,15 +6,15 @@ services:
     container_name: bugscope-postgres
     restart: always
     environment:
-      POSTGRES_USER: bugscope
-      POSTGRES_PASSWORD: bugscope_secret_password
-      POSTGRES_DB: bugscope
+      POSTGRES_USER: ${POSTGRES_USER:-bugscope}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bugscope_secret_password}
+      POSTGRES_DB: ${POSTGRES_DB:-bugscope}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bugscope"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bugscope}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,13 +29,14 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://bugscope:bugscope_secret_password@postgres:5432/bugscope
+      DATABASE_URL: postgresql://${POSTGRES_USER:-bugscope}:${POSTGRES_PASSWORD:-bugscope_secret_password}@postgres:5432/${POSTGRES_DB:-bugscope}
       BUGSCOPE_HOST: 0.0.0.0
       BUGSCOPE_PORT: 8000
     ports:
       - "8000:8000"
     volumes:
       - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:

@@ -41,45 +41,46 @@ def init_db(db_path: Optional[str] = None) -> None:
     Base.metadata.create_all(bind=eng)
 
     # Safe lightweight schema migration for existing SQLite databases
-    from sqlalchemy import text
-    try:
-        with eng.connect() as conn:
-            res = conn.execute(text("PRAGMA table_info(investigations)"))
-            cols = {row[1] for row in res.fetchall()}
-            if cols:
-                alter_map = [
-                    ("repository_name", "VARCHAR(256) DEFAULT 'unknown'"),
-                    ("repository_path", "VARCHAR(512) DEFAULT ''"),
-                    ("error_message", "TEXT"),
-                    ("stack_trace", "TEXT"),
-                    ("status", "VARCHAR(64) DEFAULT 'COMPLETED'"),
-                    ("summary", "TEXT"),
-                    ("root_cause_summary", "TEXT"),
-                    ("updated_at", "DATETIME"),
-                ]
-                for col_name, col_type in alter_map:
-                    if col_name not in cols:
-                        conn.execute(text(f"ALTER TABLE investigations ADD COLUMN {col_name} {col_type}"))
+    if eng.url.get_backend_name() == "sqlite":
+        from sqlalchemy import text
+        try:
+            with eng.connect() as conn:
+                res = conn.execute(text("PRAGMA table_info(investigations)"))
+                cols = {row[1] for row in res.fetchall()}
+                if cols:
+                    alter_map = [
+                        ("repository_name", "VARCHAR(256) DEFAULT 'unknown'"),
+                        ("repository_path", "VARCHAR(512) DEFAULT ''"),
+                        ("error_message", "TEXT"),
+                        ("stack_trace", "TEXT"),
+                        ("status", "VARCHAR(64) DEFAULT 'COMPLETED'"),
+                        ("summary", "TEXT"),
+                        ("root_cause_summary", "TEXT"),
+                        ("updated_at", "DATETIME"),
+                    ]
+                    for col_name, col_type in alter_map:
+                        if col_name not in cols:
+                            conn.execute(text(f"ALTER TABLE investigations ADD COLUMN {col_name} {col_type}"))
 
-            # Ensure traces table matches SQLAlchemy TraceLog schema (VARCHAR id, not legacy INTEGER)
-            res_tr = conn.execute(text("PRAGMA table_info(traces)"))
-            tr_info = {row[1]: row[2].upper() for row in res_tr.fetchall()}
-            if tr_info.get("id") == "INTEGER":
-                conn.execute(text("DROP TABLE traces"))
-                conn.commit()
-                Base.metadata.tables["traces"].create(bind=eng)
-            elif "created_at" not in tr_info:
-                conn.execute(text("ALTER TABLE traces ADD COLUMN created_at DATETIME"))
-                conn.commit()
+                # Ensure traces table matches SQLAlchemy TraceLog schema (VARCHAR id, not legacy INTEGER)
+                res_tr = conn.execute(text("PRAGMA table_info(traces)"))
+                tr_info = {row[1]: row[2].upper() for row in res_tr.fetchall()}
+                if tr_info.get("id") == "INTEGER":
+                    conn.execute(text("DROP TABLE traces"))
+                    conn.commit()
+                    Base.metadata.tables["traces"].create(bind=eng)
+                elif "created_at" not in tr_info:
+                    conn.execute(text("ALTER TABLE traces ADD COLUMN created_at DATETIME"))
+                    conn.commit()
 
-            # Clean legacy trailing 'Z' in datetimes for Python 3.10 datetime.fromisoformat compatibility
-            try:
-                conn.execute(text("UPDATE investigations SET created_at = REPLACE(created_at, 'Z', '') WHERE created_at LIKE '%Z'"))
-                conn.commit()
-            except Exception:
-                pass
-    except Exception:
-        pass
+                # Clean legacy trailing 'Z' in datetimes for Python 3.10 datetime.fromisoformat compatibility
+                try:
+                    conn.execute(text("UPDATE investigations SET created_at = REPLACE(created_at, 'Z', '') WHERE created_at LIKE '%Z'"))
+                    conn.commit()
+                except Exception:
+                    pass
+        except Exception:
+            pass
 
 
 def save_investigation(
@@ -90,7 +91,8 @@ def save_investigation(
     Returns:
         The investigation_id of the saved record.
     """
-    init_db(db_path)
+    if db_path:
+        init_db(db_path)
     report_json_str = report.model_dump_json()
 
     eng, sess_cls = _get_engine_and_session(db_path)

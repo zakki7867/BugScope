@@ -1,6 +1,7 @@
 """API endpoints for repository uploads, file navigation, and AST tools."""
 
 import json
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
@@ -17,6 +18,32 @@ from app.tools.repository_tools import (
 )
 
 router = APIRouter(prefix="/api/repositories", tags=["Repositories"])
+
+
+def _validate_safe_repo_dir(raw_path: str) -> Path:
+    """Validate that repository path exists and does not escape allowed workspace/temp roots."""
+    p = Path(raw_path).resolve()
+    if not p.is_dir():
+        raise HTTPException(status_code=404, detail="Repository path not found.")
+
+    allowed_roots = [
+        Path.cwd().resolve(),
+        Path(tempfile.gettempdir()).resolve(),
+    ]
+    is_safe = False
+    for root in allowed_roots:
+        try:
+            p.relative_to(root)
+            is_safe = True
+            break
+        except ValueError:
+            continue
+    if not is_safe:
+        raise HTTPException(
+            status_code=403,
+            detail="Access forbidden: Specified repository path is outside allowed workspace boundaries.",
+        )
+    return p
 
 
 class CodeSearchRequest(BaseModel):
@@ -66,11 +93,19 @@ def list_repositories():
                 gt_path = bug_dir / "ground_truth.json"
                 category = "Unknown"
                 description = bug_dir.name
+                sample_trace = ""
                 if gt_path.is_file():
                     try:
                         data = json.loads(gt_path.read_text(encoding="utf-8"))
                         category = data.get("root_cause_category") or data.get("category", "General")
                         description = data.get("notes") or data.get("description", bug_dir.name)
+                        failing_f = data.get("file", "app/main.py")
+                        failing_l = data.get("line", 1)
+                        sample_trace = (
+                            f"Traceback (most recent call last):\n"
+                            f'  File "{failing_f}", line {failing_l}, in run\n'
+                            f"{category}: {description}"
+                        )
                     except Exception:
                         pass
                 available.append({
@@ -79,6 +114,7 @@ def list_repositories():
                     "path": str(bug_dir.resolve()).replace("\\", "/"),
                     "category": category,
                     "description": description,
+                    "sample_trace": sample_trace,
                 })
     return {"repositories": available}
 
@@ -86,9 +122,7 @@ def list_repositories():
 @router.get("/tree")
 def get_repository_tree(path: str = Query(..., description="Repository root path")):
     """Get recursive directory and file hierarchy of a repository."""
-    repo_path = Path(path)
-    if not repo_path.is_dir():
-        raise HTTPException(status_code=404, detail="Repository path not found.")
+    repo_path = _validate_safe_repo_dir(path)
 
     tree = []
     for item in repo_path.rglob("*"):
@@ -113,10 +147,11 @@ def get_file(
     end_line: Optional[int] = Query(default=None),
 ):
     """Retrieve file content and numbered lines."""
+    safe_repo = _validate_safe_repo_dir(repo_path)
     sl = start_line if isinstance(start_line, int) else None
     el = end_line if isinstance(end_line, int) else None
     res = get_file_content(
-        repo_path=Path(repo_path),
+        repo_path=safe_repo,
         file_path=file_path,
         start_line=sl,
         end_line=el,
@@ -129,9 +164,7 @@ def get_file(
 @router.post("/search")
 def search_repository_code(payload: CodeSearchRequest):
     """Search code across files in repository using AST / regex."""
-    repo_path = Path(payload.repo_path)
-    if not repo_path.is_dir():
-        raise HTTPException(status_code=404, detail="Repository path not found.")
+    repo_path = _validate_safe_repo_dir(payload.repo_path)
     matches = search_code(
         repo_path=repo_path,
         query=payload.query,
@@ -148,7 +181,8 @@ def inspect_function(
     function_name: str = Query(...),
 ):
     """Extract AST docstring, arguments, decorators, and body for a function."""
-    res = get_function_info(Path(repo_path), file_path, function_name)
+    safe_repo = _validate_safe_repo_dir(repo_path)
+    res = get_function_info(safe_repo, file_path, function_name)
     if "error" in res:
         raise HTTPException(status_code=400, detail=res["error"])
     return res
@@ -160,5 +194,6 @@ def inspect_related_tests(
     symbol: str = Query(...),
 ):
     """Locate tests referencing a given module or symbol."""
-    res = find_related_tests(Path(repo_path), symbol)
+    safe_repo = _validate_safe_repo_dir(repo_path)
+    res = find_related_tests(safe_repo, symbol)
     return {"symbol": symbol, "tests": res}

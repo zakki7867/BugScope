@@ -110,17 +110,20 @@ def run_command_in_sandbox(
     scratch_dir = tempfile.mkdtemp(prefix="bugscope_scratch_")
 
     try:
-        if isinstance(command, list):
-            cmd_str = " ".join(command)
+        import shlex
+        if isinstance(command, str):
+            cmd_args = shlex.split(command)
         else:
-            cmd_str = command
+            cmd_args = list(command)
 
         # Wrapper script executes in scratch directory where project files are mirrored
+        # Uses exec "$@" to avoid arbitrary shell interpolation vulnerabilities
         container_cmd = [
             "sh",
             "-c",
-            f"cp -r /app/. /scratch/ && cd /scratch && {cmd_str}",
-        ]
+            'cp -r /app/. /scratch/ && cd /scratch && exec "$@"',
+            "sandbox_exec",
+        ] + cmd_args
 
         volumes = {
             str(proj_path): {"bind": "/app", "mode": "ro"},

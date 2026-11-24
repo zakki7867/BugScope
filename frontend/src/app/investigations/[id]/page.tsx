@@ -40,7 +40,10 @@ export default function InvestigationDetails() {
       setApplyingPatch(true);
       setPatchActionMsg(null);
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
-      const targetDir = report?.failure_report?.file?.includes("/") ? report.failure_report.file.split("/")[0] : ".";
+      const targetDir =
+        (report as any)?.repository_path ||
+        (report?.context_bundle as any)?.repo_dir ||
+        (report?.failure_report?.file?.includes("/") ? report.failure_report.file.substring(0, report.failure_report.file.lastIndexOf("/")) : ".");
       const res = await fetch(`${API_BASE}/patches/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,7 +69,10 @@ export default function InvestigationDetails() {
       setApplyingPatch(true);
       setPatchActionMsg(null);
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
-      const targetDir = report?.failure_report?.file?.includes("/") ? report.failure_report.file.split("/")[0] : ".";
+      const targetDir =
+        (report as any)?.repository_path ||
+        (report?.context_bundle as any)?.repo_dir ||
+        (report?.failure_report?.file?.includes("/") ? report.failure_report.file.substring(0, report.failure_report.file.lastIndexOf("/")) : ".");
       const res = await fetch(`${API_BASE}/patches/rollback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

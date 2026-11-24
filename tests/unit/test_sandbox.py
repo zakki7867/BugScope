@@ -71,3 +71,11 @@ def test_run_command_with_mock_container(tmp_path):
     volumes = kwargs["volumes"]
     assert str(tmp_path) in volumes
     assert volumes[str(tmp_path)]["mode"] == "ro"
+
+    # Verify safe container command avoids raw shell string interpolation
+    command_args = kwargs["command"]
+    assert command_args[0] == "sh"
+    assert command_args[1] == "-c"
+    assert 'exec "$@"' in command_args[2]
+    assert command_args[3] == "sandbox_exec"
+    assert command_args[4:] == ["python", "-m", "pytest"]

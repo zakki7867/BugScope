@@ -79,8 +79,18 @@ def apply_patch_endpoint(payload: ApplyPatchRequest):
             detail="No valid patch found for this investigation.",
         )
 
-    target_path = Path(payload.target_repo_dir).resolve()
-    if not target_path.is_dir():
+    target_path = Path(payload.target_repo_dir).resolve() if payload.target_repo_dir else None
+    if not target_path or not target_path.is_dir():
+        from app.database.session import SessionLocal
+        from app.models.investigation import Investigation
+        with SessionLocal() as sess:
+            inv = sess.query(Investigation).filter_by(id=payload.investigation_id).first()
+            if inv and inv.repository_path and Path(inv.repository_path).is_dir():
+                target_path = Path(inv.repository_path).resolve()
+            elif inv and inv.file and Path(inv.file).is_file():
+                target_path = Path(inv.file).resolve().parent
+
+    if not target_path or not target_path.is_dir():
         raise HTTPException(
             status_code=400,
             detail=f"Target repository directory does not exist: {payload.target_repo_dir}",
@@ -90,6 +100,7 @@ def apply_patch_endpoint(payload: ApplyPatchRequest):
     diff = report.fix_proposal.diff
     try:
         from app.services.patcher import parse_unified_diff
+        import json
         hunks_map = parse_unified_diff(diff)
         backups: Dict[str, str] = {}
         for rel_p in hunks_map.keys():
@@ -104,9 +115,17 @@ def apply_patch_endpoint(payload: ApplyPatchRequest):
         # Apply patch with atomic rollback on failure
         modified_files = apply_patch_to_directory(str(target_path), diff)
 
-        # Store backup snapshot in registry for rollback
+        # Store backup snapshot in memory registry and persistent disk storage for rollback
         registry_key = f"{payload.investigation_id}:{str(target_path)}"
         _ROLLBACK_REGISTRY[registry_key] = backups
+
+        backup_dir = Path("scratch/rollback_snapshots")
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        backup_file = backup_dir / f"{payload.investigation_id}.json"
+        try:
+            backup_file.write_text(json.dumps(backups), encoding="utf-8")
+        except Exception:
+            pass
 
         return {
             "status": "applied",
@@ -124,10 +143,28 @@ def apply_patch_endpoint(payload: ApplyPatchRequest):
 @router.post("/rollback")
 def rollback_patch_endpoint(payload: RollbackPatchRequest):
     """Roll back an applied patch to its exact pre-patch state using stored backup snapshots."""
-    target_path = Path(payload.target_repo_dir).resolve()
-    registry_key = f"{payload.investigation_id}:{str(target_path)}"
+    target_path = Path(payload.target_repo_dir).resolve() if payload.target_repo_dir else None
+    registry_key = f"{payload.investigation_id}:{str(target_path)}" if target_path else payload.investigation_id
 
     backups = _ROLLBACK_REGISTRY.get(registry_key)
+    if not backups:
+        # Check fallback by investigation_id prefix in registry
+        for k, v in _ROLLBACK_REGISTRY.items():
+            if k.startswith(f"{payload.investigation_id}:"):
+                backups = v
+                registry_key = k
+                break
+
+    # If not in memory registry, check persistent disk snapshot
+    if not backups:
+        import json
+        backup_file = Path("scratch/rollback_snapshots") / f"{payload.investigation_id}.json"
+        if backup_file.is_file():
+            try:
+                backups = json.loads(backup_file.read_text(encoding="utf-8"))
+            except Exception:
+                backups = None
+
     if not backups:
         raise HTTPException(
             status_code=404,
@@ -143,8 +180,15 @@ def rollback_patch_endpoint(payload: RollbackPatchRequest):
         except Exception as exc:
             raise HTTPException(status_code=500, detail=f"Failed reverting {f_path}: {exc}") from exc
 
-    # Remove from registry once reverted
-    del _ROLLBACK_REGISTRY[registry_key]
+    # Clean up from memory registry and disk
+    if registry_key in _ROLLBACK_REGISTRY:
+        del _ROLLBACK_REGISTRY[registry_key]
+    backup_file = Path("scratch/rollback_snapshots") / f"{payload.investigation_id}.json"
+    if backup_file.is_file():
+        try:
+            backup_file.unlink()
+        except Exception:
+            pass
 
     return {
         "status": "rolled_back",

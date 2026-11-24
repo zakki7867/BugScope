@@ -15,6 +15,7 @@ def experiment_runner(
     failure_report: FailureReport,
     ranked_hypotheses: List[RankedHypothesis],
     reproduction_result: Optional[ReproductionResult] = None,
+    custom_docker_client=None,
 ) -> List[ExperimentResult]:
     """Execute controlled experiments to empirically confirm or refute candidate hypotheses.
 
@@ -47,17 +48,23 @@ def experiment_runner(
         )
 
         # Run command in sandbox
-        sandbox_res = run_command_in_sandbox(repo_dir=repo_dir, command=cmd)
+        sandbox_res = run_command_in_sandbox(
+            project_dir=repo_dir,
+            command=cmd,
+            custom_docker_client=custom_docker_client,
+        )
 
         conclusion = "inconclusive"
-        if sandbox_res.reproduced:
-            # If reproduced, verify if error message matches hypothesis reasoning
-            if failure_report.error_type.lower() in sandbox_res.stdout.lower() or failure_report.error_type.lower() in sandbox_res.stderr.lower():
+        if not sandbox_res.docker_available:
+            conclusion = "inconclusive"
+        elif sandbox_res.exit_code != 0:
+            out_all = f"{sandbox_res.stdout}\n{sandbox_res.stderr}".lower()
+            if failure_report.error_type.lower() in out_all:
                 conclusion = "confirmed"
             else:
                 conclusion = "inconclusive"
         else:
-            conclusion = "refuted" if sandbox_res.exit_code == 0 else "inconclusive"
+            conclusion = "refuted"
 
         exp_result = ExperimentResult(
             hypothesis_id=hyp.id,

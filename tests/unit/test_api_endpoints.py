@@ -77,6 +77,13 @@ def test_repositories_endpoints():
     )
     assert search_res["matches_count"] > 0
 
+    # Security test: reject path traversal to system directories outside workspace
+    from fastapi import HTTPException
+    bad_system_path = "C:\\Windows" if os.name == "nt" else "/etc"
+    with pytest.raises(HTTPException) as exc_info:
+        get_repository_tree(path=bad_system_path)
+    assert exc_info.value.status_code in (403, 404)
+
 
 def test_evaluation_endpoints():
     bms = list_benchmarks()

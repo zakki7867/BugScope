@@ -25,11 +25,10 @@ export default function NewInvestigation() {
   const handleSelectBug = (bug: any) => {
     setRepoDir(bug.path);
     setUploadedZipName(null);
-    // Auto-fill a representative stack trace for benchmark bug
-    setRawTrace(`Traceback (most recent call last):
-  File "tests/test_main.py", line 14, in test_failure
-    assert run_target() == expected
-AssertionError: Bug triggered in ${bug.name}`);
+    setRawTrace(
+      bug.sample_trace ||
+        `Traceback (most recent call last):\n  File "${bug.id}/app.py", line 1, in run\n${bug.category}: ${bug.description}`
+    );
     setTestCommand(`pytest ${bug.path}/tests/`);
   };
 

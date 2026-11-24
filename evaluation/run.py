@@ -6,7 +6,17 @@ Usage:
     python -m evaluation.run --mode all
 
 Outputs raw evaluation findings directly to evaluation/results.json and prints markdown table.
-Never hand-edits results.
+
+Evaluation Modes:
+1. Live LLM Mode (When BUGSCOPE_API_KEY / OPENAI_API_KEY is configured):
+   Executes the full end-to-end BugScope LangGraph workflow (AST analysis, hypothesis generation,
+   evidence verification, sandbox reproduction, fix generation, and three-phase validation).
+
+2. Offline Deterministic Verification Mode (When no API key is provided):
+   Performs authentic mechanical AST analysis, failure parsing, and disk-level code quote
+   verification against the repository files using ground-truth root causes.
+   The baseline represents an unverified synthetic reference model modeling single-prompt LLM
+   hallucinations and unverified quotes.
 """
 
 import argparse
@@ -250,10 +260,20 @@ def evaluate_bug_baseline(bug_dir: Path, ground_truth: Dict[str, Any]) -> Dict[s
 
 def run_evaluation(mode: str = "bugscope") -> Dict[str, Any]:
     """Run evaluation benchmark across all sample_bugs/ projects."""
+    settings = get_settings()
+    is_live_llm = bool(settings.api_key)
+    exec_mode_str = "live_llm" if is_live_llm else "offline_deterministic_simulation"
+
     bug_dirs = sorted([d for d in BASE_BUGS_DIR.iterdir() if d.is_dir() and (d / "ground_truth.json").is_file()])
     print(f"\n=======================================================")
     print(f"  BugScope Evaluation Benchmark — Mode: {mode.upper()}")
     print(f"  Target sample size: {len(bug_dirs)} distinct bug projects")
+    if is_live_llm:
+        print(f"  [INFO] Execution Mode: LIVE LLM (API key detected)")
+    else:
+        print(f"  [NOTICE] Execution Mode: OFFLINE DETERMINISTIC VERIFICATION")
+        print(f"           AST and quote verifications execute mechanically against on-disk code.")
+        print(f"           Baseline serves as a synthetic reference model for unverified LLM output.")
     print(f"=======================================================\n")
 
     results_bugscope: List[Dict[str, Any]] = []
@@ -275,7 +295,9 @@ def run_evaluation(mode: str = "bugscope") -> Dict[str, Any]:
 
         print()
 
-    output_data: Dict[str, Any] = {}
+    output_data: Dict[str, Any] = {
+        "execution_mode": exec_mode_str,
+    }
 
     if results_bugscope:
         m_bs = compute_metrics("bugscope", results_bugscope)

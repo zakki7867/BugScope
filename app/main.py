@@ -150,11 +150,14 @@ class RunInvestigationRequest(BaseModel):
 def run_investigation_endpoint(request: RunInvestigationRequest):
     """Execute end-to-end evidence-checked investigation graph."""
     repo_path = request.repo_dir or "."
+    from app.api.repositories import _validate_safe_repo_dir
+    safe_dir = _validate_safe_repo_dir(repo_path)
+
     graph = create_bugscope_graph()
 
     initial_state = {
         "raw_trace": request.raw_trace,
-        "repo_dir": repo_path,
+        "repo_dir": str(safe_dir),
         "traces": [],
         "retries_used": 0,
         "max_retries": 2,
