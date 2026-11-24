@@ -405,7 +405,8 @@ BUGS = [
                 "def is_cache_valid(last_updated_ts, ttl_seconds):\n"
                 "    # Bug: calling .seconds on integer timestamp\n"
                 "    expiry = last_updated_ts + ttl_seconds\n"
-                "    return expiry > 1000\n"
+                "    # Calling .seconds attribute on integer timestamp instead of timedelta\n"
+                "    return expiry.seconds > 1000\n"
             ),
             "tests/test_cache.py": (
                 "import pytest\n"
