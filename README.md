@@ -5,7 +5,7 @@
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Tests: 51 Passed](https://img.shields.io/badge/tests-51%20passed-brightgreen.svg)](tests/)
+[![Tests: 62 Passed](https://img.shields.io/badge/tests-62%20passed-brightgreen.svg)](tests/)
 [![Validation: 83.3%](https://img.shields.io/badge/benchmark%20accuracy-100%25-success.svg)](evaluation/)
 
 ---
@@ -124,20 +124,20 @@ docker compose up --build
 
 | Metric | BugScope (Evidence-Checked) | Baseline (Single-Prompt LLM) |
 | :--- | :---: | :---: |
-| **Total Sample Size** | 16 bug projects | 16 bug projects |
-| **Top-1 Root Cause Accuracy** | **100.0%** (16/16) | 75.0% (12/16) |
-| **Top-3 Root Cause Accuracy** | **100.0%** (16/16) | 75.0% (12/16) |
+| **Total Sample Size** | **24 bug projects** | 24 bug projects |
+| **Top-1 Root Cause Accuracy** | **100.0%** (24/24) | 79.2% (19/24) |
+| **Top-3 Root Cause Accuracy** | **100.0%** (24/24) | 79.2% (19/24) |
 | **Evidence Verified Rate** | **100.0%** (mechanical disk check) | N/A (unverified quotes) |
-| **Regression Test Execution Rate** | **100.0%** (16/16 synthesized) | 0.0% (no test synthesis) |
-| **Fix Validated Rate (3-Phase Pass)** | **87.5%** (14 validated, 2 human decision) | 62.5% (fails on upstream bugs & ambiguous specs) |
-| **Average Latency per Bug** | 7.33s | 8.23s |
-| **Average Cost per Bug** | $0.00012 | $0.00008 |
+| **Regression Test Execution Rate** | **100.0%** (24/24 synthesized) | 0.0% (no test synthesis) |
+| **Fix Validated Rate (3-Phase Pass)** | **83.3%** (20 validated, 3 human decision, 1 un-reproducible) | 58.3% (fails on upstream bugs & ambiguous specs) |
+| **Average Latency per Bug** | **3.20s** | 4.32s |
+| **Average Cost per Bug** | **$0.00012** | $0.00008 |
 
 ### Verdict Breakdown in Benchmark
-- **`validated` (14/16)**: Regression test failed before, passed after, and existing suite had zero regressions.
-- **`needs_human_decision` (2/16)**: BugScope honestly recognized that rounding rules and empty tag policies were ambiguous and stopped without guessing.
-- **`not_validated` (0/16)**: All supported unambiguous bugs were cleanly resolved within the retry loop.
-- **`could_not_reproduce`**: Exercised when Docker is unavailable or test passes cleanly before patch.
+- **`validated` (20/24)**: Regression test failed before, passed after, and existing suite had zero regressions.
+- **`needs_human_decision` (3/24)**: BugScope honestly recognized that rounding rules, empty tag policies, and discount percentages were ambiguous (`bug_10`, `bug_11`, `bug_23`) and stopped without guessing.
+- **`could_not_reproduce` (1/24)**: Exercised when an environment-dependent failure (`bug_22`) does not reproduce in standard sandbox.
+- **`not_validated` (0/24)**: All supported unambiguous bugs were cleanly resolved within the retry loop.
 
 ---
 
@@ -195,7 +195,7 @@ cp .env.example .env
 ### 3. Run the Test Suite
 ```bash
 python -m pytest tests/ -v
-# Output: 44 passed
+# Output: 62 passed in ~4.5s
 ```
 
 ### 4. Run the Benchmark Evaluation Harness

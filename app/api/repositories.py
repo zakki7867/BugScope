@@ -113,11 +113,13 @@ def get_file(
     end_line: Optional[int] = Query(default=None),
 ):
     """Retrieve file content and numbered lines."""
+    sl = start_line if isinstance(start_line, int) else None
+    el = end_line if isinstance(end_line, int) else None
     res = get_file_content(
         repo_path=Path(repo_path),
         file_path=file_path,
-        start_line=start_line,
-        end_line=end_line,
+        start_line=sl,
+        end_line=el,
     )
     if "error" in res:
         raise HTTPException(status_code=400, detail=res["error"])
